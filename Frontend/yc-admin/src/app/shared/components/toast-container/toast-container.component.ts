@@ -1,8 +1,11 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { ToastService, Toast } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-toast-container',
+  standalone: true,
+  imports: [CommonModule],
   template: `
     <div class="toast-container">
       <div *ngFor="let toast of toasts" class="toast toast-{{toast.type}}" (click)="toastService.remove(toast.id)">

@@ -8,16 +8,14 @@ import { MediaPickerComponent } from './components/media-picker/media-picker.com
 import { PaginationComponent } from './components/pagination/pagination.component';
 
 @NgModule({
-  declarations: [
-    ConfirmDialogComponent,
-    MediaPickerComponent,
-    PaginationComponent
-  ],
   imports: [
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    RouterModule
+    RouterModule,
+    ConfirmDialogComponent,
+    MediaPickerComponent,
+    PaginationComponent
   ],
   exports: [
     CommonModule,

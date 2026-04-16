@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
 
 interface NavItem {
   label: string;
@@ -10,6 +11,8 @@ interface NavItem {
 
 @Component({
   selector: 'app-sidebar',
+  standalone: true,
+  imports: [CommonModule, RouterModule],
   template: `
     <aside class="sidebar" [class.collapsed]="collapsed">
       <div class="sidebar-logo">

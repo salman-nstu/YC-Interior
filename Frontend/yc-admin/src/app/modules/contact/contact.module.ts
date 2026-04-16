@@ -1,10 +1,8 @@
 import { NgModule } from '@angular/core';
-import { RouterModule } from '@angular/router';
-import { SharedModule } from '../../shared/shared.module';
+import { CommonModule } from '@angular/common';\nimport { RouterModule } from '@angular/router';
 import { ContactComponent } from './contact.component';
 
 @NgModule({
-  declarations: [ContactComponent],
-  imports: [SharedModule, RouterModule.forChild([{ path: '', component: ContactComponent }])]
+  imports: [CommonModule, ContactComponent, RouterModule.forChild([{ path: '', component: ContactComponent }])]
 })
 export class ContactModule {}

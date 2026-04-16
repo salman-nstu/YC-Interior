@@ -16,20 +16,19 @@ import { ToastContainerComponent } from './shared/components/toast-container/toa
 import { SpinnerComponent } from './shared/components/spinner/spinner.component';
 
 @NgModule({
-  declarations: [
-    App,
-    SidebarComponent,
-    NavbarComponent,
-    ToastContainerComponent,
-    SpinnerComponent
-  ],
+  declarations: [],
   imports: [
     BrowserModule,
     ReactiveFormsModule,
     FormsModule,
     HttpClientModule,
     SharedModule,
-    AppRoutingModule
+    AppRoutingModule,
+    App,
+    SidebarComponent,
+    NavbarComponent,
+    ToastContainerComponent,
+    SpinnerComponent
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
