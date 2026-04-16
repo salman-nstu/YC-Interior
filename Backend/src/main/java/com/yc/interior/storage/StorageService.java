@@ -1,0 +1,8 @@
+package com.yc.interior.storage;
+
+import org.springframework.web.multipart.MultipartFile;
+
+public interface StorageService {
+    String store(MultipartFile file, String subDir);
+    void delete(String fileName);
+}

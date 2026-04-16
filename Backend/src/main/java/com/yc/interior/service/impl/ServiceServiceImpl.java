@@ -1,0 +1,112 @@
+package com.yc.interior.service.impl;
+
+import com.yc.interior.dto.request.ServiceRequest;
+import com.yc.interior.dto.response.MediaResponse;
+import com.yc.interior.dto.response.ServiceResponse;
+import com.yc.interior.entity.Service;
+import com.yc.interior.entity.ServiceImage;
+import com.yc.interior.exception.ResourceNotFoundException;
+import com.yc.interior.repository.*;
+import com.yc.interior.service.ServiceService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.*;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@org.springframework.stereotype.Service
+@RequiredArgsConstructor
+public class ServiceServiceImpl implements ServiceService {
+
+    private final ServiceRepository serviceRepository;
+    private final ServiceImageRepository serviceImageRepository;
+    private final MediaRepository mediaRepository;
+    private final MediaServiceImpl mediaService;
+
+    @Override
+    public Page<ServiceResponse> getAll(String keyword, String status, Pageable pageable) {
+        Service.ServiceStatus serviceStatus = parseStatus(status);
+        return serviceRepository.findAllWithFilters(keyword, serviceStatus, pageable).map(this::toResponse);
+    }
+
+    @Override
+    public ServiceResponse getById(Long id) {
+        return toResponse(serviceRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Service", id)));
+    }
+
+    @Override
+    @Transactional
+    public ServiceResponse create(ServiceRequest request) {
+        Service entity = Service.builder()
+                .title(request.getTitle())
+                .description(request.getDescription())
+                .coverMediaId(request.getCoverMediaId())
+                .status(parseStatus(request.getStatus()) != null ? parseStatus(request.getStatus()) : Service.ServiceStatus.published)
+                .displayOrder(request.getDisplayOrder() != null ? request.getDisplayOrder() : 0)
+                .isActive(request.getIsActive() != null ? request.getIsActive() : true)
+                .build();
+        if (entity.getStatus() == Service.ServiceStatus.published) entity.setPublishedAt(LocalDateTime.now());
+        Service saved = serviceRepository.save(entity);
+        saveImages(saved.getId(), request.getImageMediaIds());
+        return toResponse(saved);
+    }
+
+    @Override
+    @Transactional
+    public ServiceResponse update(Long id, ServiceRequest request) {
+        Service entity = serviceRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Service", id));
+        entity.setTitle(request.getTitle());
+        entity.setDescription(request.getDescription());
+        entity.setCoverMediaId(request.getCoverMediaId());
+        Service.ServiceStatus status = parseStatus(request.getStatus());
+        if (status != null) entity.setStatus(status);
+        if (entity.getStatus() == Service.ServiceStatus.published && entity.getPublishedAt() == null)
+            entity.setPublishedAt(LocalDateTime.now());
+        if (request.getDisplayOrder() != null) entity.setDisplayOrder(request.getDisplayOrder());
+        if (request.getIsActive() != null) entity.setIsActive(request.getIsActive());
+        serviceImageRepository.deleteByServiceId(id);
+        saveImages(id, request.getImageMediaIds());
+        return toResponse(serviceRepository.save(entity));
+    }
+
+    @Override
+    @Transactional
+    public void delete(Long id) {
+        if (!serviceRepository.existsById(id)) throw new ResourceNotFoundException("Service", id);
+        serviceImageRepository.deleteByServiceId(id);
+        serviceRepository.deleteById(id);
+    }
+
+    private void saveImages(Long serviceId, List<Long> mediaIds) {
+        if (mediaIds == null) return;
+        mediaIds.forEach(mediaId -> serviceImageRepository.save(
+                ServiceImage.builder().serviceId(serviceId).mediaId(mediaId).build()));
+    }
+
+    private ServiceResponse toResponse(Service e) {
+        List<MediaResponse> images = serviceImageRepository.findByServiceId(e.getId()).stream()
+                .map(si -> mediaRepository.findByIdAndDeletedAtIsNull(si.getMediaId())
+                        .map(mediaService::toResponse).orElse(null))
+                .filter(m -> m != null).collect(Collectors.toList());
+
+        var res = ServiceResponse.builder()
+                .id(e.getId()).title(e.getTitle()).description(e.getDescription())
+                .coverMediaId(e.getCoverMediaId())
+                .status(e.getStatus() != null ? e.getStatus().name() : null)
+                .publishedAt(e.getPublishedAt()).displayOrder(e.getDisplayOrder())
+                .isActive(e.getIsActive()).createdAt(e.getCreatedAt()).updatedAt(e.getUpdatedAt())
+                .images(images);
+        if (e.getCoverMediaId() != null)
+            mediaRepository.findByIdAndDeletedAtIsNull(e.getCoverMediaId()).ifPresent(m -> res.coverMedia(mediaService.toResponse(m)));
+        return res.build();
+    }
+
+    private Service.ServiceStatus parseStatus(String status) {
+        if (status == null) return null;
+        try { return Service.ServiceStatus.valueOf(status); } catch (Exception e) { return null; }
+    }
+}
