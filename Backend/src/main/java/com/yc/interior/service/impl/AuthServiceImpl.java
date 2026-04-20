@@ -45,10 +45,19 @@ public class AuthServiceImpl implements AuthService {
             int attempts = admin.getLoginAttempts() == null ? 0 : admin.getLoginAttempts();
             attempts++;
             admin.setLoginAttempts(attempts);
-            if (attempts >= 5) {
+            
+            // Progressive lockout: 5 attempts = 15 min, 10 attempts = 1 hour, 15+ = 24 hours
+            if (attempts >= 15) {
+                admin.setLockedUntil(LocalDateTime.now().plusHours(24));
+                log.warn("Admin account locked for 24 hours after {} failed attempts: {}", attempts, admin.getEmail());
+            } else if (attempts >= 10) {
+                admin.setLockedUntil(LocalDateTime.now().plusHours(1));
+                log.warn("Admin account locked for 1 hour after {} failed attempts: {}", attempts, admin.getEmail());
+            } else if (attempts >= 5) {
                 admin.setLockedUntil(LocalDateTime.now().plusMinutes(15));
-                log.warn("Admin account locked after {} failed attempts: {}", attempts, admin.getEmail());
+                log.warn("Admin account locked for 15 minutes after {} failed attempts: {}", attempts, admin.getEmail());
             }
+            
             adminRepository.save(admin);
             throw new BadCredentialsException("Invalid email or password");
         }

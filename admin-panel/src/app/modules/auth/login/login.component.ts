@@ -30,7 +30,7 @@ import { AuthService } from '../../../core/services/auth.service';
         <form [formGroup]="form" (ngSubmit)="submit()">
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Email</mat-label>
-            <input matInput type="email" formControlName="email" placeholder="admin@example.com">
+            <input matInput type="email" formControlName="email" placeholder="admin@yc.com">
             <mat-icon matPrefix>email</mat-icon>
             <mat-error *ngIf="form.get('email')?.hasError('required')">Email is required</mat-error>
             <mat-error *ngIf="form.get('email')?.hasError('email')">Invalid email</mat-error>
@@ -60,22 +60,64 @@ import { AuthService } from '../../../core/services/auth.service';
     .login-page {
       min-height: 100vh;
       display: flex; align-items: center; justify-content: center;
-      background: linear-gradient(135deg, #1b5e20 0%, #388e3c 50%, #81c784 100%);
+      background: linear-gradient(135deg, var(--matcha-dark) 0%, var(--matcha) 50%, var(--matcha-light) 100%);
     }
     .login-card {
-      background: white; border-radius: 16px;
-      padding: 40px; width: 100%; max-width: 400px;
-      box-shadow: 0 20px 60px rgba(0,0,0,.2);
+      background: var(--surface); 
+      border-radius: 16px;
+      padding: 40px; 
+      width: 100%; 
+      max-width: 400px;
+      box-shadow: var(--shadow-hover);
+      border: 1px solid var(--border);
     }
     .login-header {
       text-align: center; margin-bottom: 32px;
-      .logo-icon { font-size: 48px; width: 48px; height: 48px; color: #388e3c; }
-      h1 { font-size: 24px; font-weight: 700; color: #1b5e20; margin-top: 8px; }
-      p { color: #757575; font-size: 14px; }
+      .logo-icon { 
+        font-size: 48px; 
+        width: 48px; 
+        height: 48px; 
+        color: var(--matcha); 
+      }
+      h1 { 
+        font-size: 24px; 
+        font-weight: 700; 
+        color: var(--text); 
+        margin-top: 8px; 
+      }
+      p { 
+        color: var(--text-muted); 
+        font-size: 14px; 
+      }
     }
-    .full-width { width: 100%; margin-bottom: 8px; }
-    .error-msg { color: #c62828; font-size: 13px; margin-bottom: 12px; padding: 8px 12px; background: #ffebee; border-radius: 6px; }
-    .submit-btn { width: 100%; height: 48px; font-size: 16px; margin-top: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .full-width { 
+      width: 100%; 
+      margin-bottom: 8px; 
+    }
+    .error-msg { 
+      color: #c62828; 
+      font-size: 13px; 
+      margin-bottom: 12px; 
+      padding: 8px 12px; 
+      background: #ffebee; 
+      border-radius: 6px; 
+    }
+    .submit-btn { 
+      width: 100%; 
+      height: 48px; 
+      font-size: 16px; 
+      margin-top: 8px; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      gap: 8px; 
+    }
+    
+    // Dark mode specific styles
+    :host-context(.dark-mode) .error-msg {
+      background: #2e1a1a;
+      color: #e57373;
+    }
   `]
 })
 export class LoginComponent {

@@ -51,17 +51,64 @@ import { AuthService } from '../../core/services/auth.service';
       padding: 0 16px;
       box-shadow: var(--shadow);
       position: sticky; top: 0; z-index: 50;
+      transition: background-color .3s ease, border-color .3s ease;
     }
-    .navbar-left { display: flex; align-items: center; gap: 8px; }
-    .page-title { font-size: 16px; font-weight: 500; color: var(--text); }
-    .navbar-right { display: flex; align-items: center; gap: 4px; }
-    .admin-btn { display: flex; align-items: center; gap: 4px; color: var(--text); }
+    
+    .navbar-left { 
+      display: flex; 
+      align-items: center; 
+      gap: 8px; 
+    }
+    
+    .page-title { 
+      font-size: 16px; 
+      font-weight: 500; 
+      color: var(--text); 
+      transition: color .3s ease;
+    }
+    
+    .navbar-right { 
+      display: flex; 
+      align-items: center; 
+      gap: 4px; 
+    }
+    
+    .admin-btn { 
+      display: flex; 
+      align-items: center; 
+      gap: 4px; 
+      color: var(--text);
+      transition: color .3s ease;
+      
+      &:hover {
+        background: var(--surface-alt);
+      }
+    }
+    
     .admin-info {
       padding: 12px 16px;
       display: flex; flex-direction: column;
       border-bottom: 1px solid var(--border);
-      strong { font-size: 14px; }
-      small { font-size: 12px; color: var(--text-muted); }
+      background: var(--surface);
+      
+      strong { 
+        font-size: 14px; 
+        color: var(--text);
+      }
+      small { 
+        font-size: 12px; 
+        color: var(--text-muted); 
+      }
+    }
+    
+    /* Dark mode button styling */
+    button[mat-icon-button] {
+      color: var(--text);
+      transition: color .3s ease, background-color .3s ease;
+      
+      &:hover {
+        background: var(--surface-alt);
+      }
     }
   `]
 })

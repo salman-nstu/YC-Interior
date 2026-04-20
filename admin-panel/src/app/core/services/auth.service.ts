@@ -10,18 +10,22 @@ import { environment } from '../../environments/environment';
 export class AuthService {
   private readonly TOKEN_KEY = 'yc_token';
   private readonly ADMIN_KEY = 'yc_admin';
+  private readonly TOKEN_EXPIRY_KEY = 'yc_token_expiry';
 
-  isLoggedIn = signal(this.hasToken());
+  isLoggedIn = signal(this.hasValidToken());
   currentAdmin = signal<LoginResponse | null>(this.getStoredAdmin());
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(private http: HttpClient, private router: Router) {
+    // Check token expiry on service initialization
+    this.checkTokenExpiry();
+  }
 
   login(req: LoginRequest): Observable<ApiResponse<LoginResponse>> {
     return this.http.post<ApiResponse<LoginResponse>>(`${environment.apiUrl}/auth/login`, req).pipe(
       tap(res => {
         if (res.success && res.data) {
-          localStorage.setItem(this.TOKEN_KEY, res.data.token);
-          localStorage.setItem(this.ADMIN_KEY, JSON.stringify(res.data));
+          this.storeTokenSecurely(res.data.token);
+          sessionStorage.setItem(this.ADMIN_KEY, JSON.stringify(res.data));
           this.isLoggedIn.set(true);
           this.currentAdmin.set(res.data);
         }
@@ -31,22 +35,58 @@ export class AuthService {
 
   logout(): void {
     localStorage.removeItem(this.TOKEN_KEY);
-    localStorage.removeItem(this.ADMIN_KEY);
+    localStorage.removeItem(this.TOKEN_EXPIRY_KEY);
+    sessionStorage.removeItem(this.ADMIN_KEY);
     this.isLoggedIn.set(false);
     this.currentAdmin.set(null);
     this.router.navigate(['/login']);
   }
 
   getToken(): string | null {
+    if (!this.hasValidToken()) {
+      this.logout();
+      return null;
+    }
     return localStorage.getItem(this.TOKEN_KEY);
   }
 
-  private hasToken(): boolean {
-    return !!localStorage.getItem(this.TOKEN_KEY);
+  private storeTokenSecurely(token: string): void {
+    // Store token in localStorage (consider httpOnly cookies for production)
+    localStorage.setItem(this.TOKEN_KEY, token);
+    
+    // Calculate and store expiry time (1 hour from now)
+    const expiryTime = Date.now() + (60 * 60 * 1000); // 1 hour
+    localStorage.setItem(this.TOKEN_EXPIRY_KEY, expiryTime.toString());
+  }
+
+  private hasValidToken(): boolean {
+    const token = localStorage.getItem(this.TOKEN_KEY);
+    const expiry = localStorage.getItem(this.TOKEN_EXPIRY_KEY);
+    
+    if (!token || !expiry) {
+      return false;
+    }
+    
+    // Check if token is expired
+    if (Date.now() > parseInt(expiry)) {
+      this.logout();
+      return false;
+    }
+    
+    return true;
+  }
+
+  private checkTokenExpiry(): void {
+    // Check token expiry every minute
+    setInterval(() => {
+      if (!this.hasValidToken() && this.isLoggedIn()) {
+        this.logout();
+      }
+    }, 60000);
   }
 
   private getStoredAdmin(): LoginResponse | null {
-    const s = localStorage.getItem(this.ADMIN_KEY);
+    const s = sessionStorage.getItem(this.ADMIN_KEY);
     return s ? JSON.parse(s) : null;
   }
 }

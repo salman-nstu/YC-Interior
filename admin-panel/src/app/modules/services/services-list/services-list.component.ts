@@ -1,134 +1,203 @@
-import { Component, OnInit, inject, ChangeDetectorRef, NgZone } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { FormsModule } from '@angular/forms';
-import { MatTableModule } from '@angular/material/table';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { PageEvent } from '@angular/material/paginator';
+import { Subject, takeUntil, finalize } from 'rxjs';
+import { DataTableComponent, TableColumn, TableAction, FilterOption } from '../../../shared/data-table/data-table.component';
 import { ServiceService } from '../../../core/services/service.service';
-import { ServiceResponse } from '../../../core/models/service.model';
-import { ConfirmDialogComponent } from '../../../shared/confirm-dialog/confirm-dialog.component';
+import { ServiceResponse, ServiceRequest } from '../../../core/models/service.model';
 
 @Component({
   selector: 'app-services-list',
   standalone: true,
   imports: [
-    CommonModule, RouterModule, FormsModule,
-    MatTableModule, MatButtonModule, MatIconModule,
-    MatFormFieldModule, MatInputModule, MatPaginatorModule,
-    MatSnackBarModule, MatDialogModule, MatTooltipModule, MatProgressSpinnerModule
+    CommonModule, RouterModule,
+    DataTableComponent
   ],
   template: `
-    <div class="page-header">
-      <h1>Services</h1>
-      <a mat-flat-button color="primary" routerLink="/services/new">
-        <mat-icon>add</mat-icon> New Service
-      </a>
-    </div>
-    <div class="table-container">
-      <div class="filter-bar">
-        <mat-form-field appearance="outline">
-          <mat-label>Search</mat-label>
-          <input matInput [(ngModel)]="keyword" (ngModelChange)="onSearch()" placeholder="Search services...">
-          <mat-icon matSuffix>search</mat-icon>
-        </mat-form-field>
-      </div>
-      <div *ngIf="loading" style="display:flex;justify-content:center;padding:40px"><mat-spinner diameter="40"></mat-spinner></div>
-      <table mat-table [dataSource]="items" *ngIf="!loading">
-        <ng-container matColumnDef="cover">
-          <th mat-header-cell *matHeaderCellDef>Cover</th>
-          <td mat-cell *matCellDef="let row">
-            <img *ngIf="row.coverMedia" [src]="row.coverMedia.url" class="thumb" [alt]="row.title">
-            <mat-icon *ngIf="!row.coverMedia" style="color:#ccc">image</mat-icon>
-          </td>
-        </ng-container>
-        <ng-container matColumnDef="title">
-          <th mat-header-cell *matHeaderCellDef>Title</th>
-          <td mat-cell *matCellDef="let row"><strong>{{ row.title }}</strong></td>
-        </ng-container>
-        <ng-container matColumnDef="status">
-          <th mat-header-cell *matHeaderCellDef>Status</th>
-          <td mat-cell *matCellDef="let row"><span class="badge" [ngClass]="row.status">{{ row.status }}</span></td>
-        </ng-container>
-        <ng-container matColumnDef="order">
-          <th mat-header-cell *matHeaderCellDef>Order</th>
-          <td mat-cell *matCellDef="let row">{{ row.displayOrder }}</td>
-        </ng-container>
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef>Actions</th>
-          <td mat-cell *matCellDef="let row">
-            <a mat-icon-button [routerLink]="['/services', row.id, 'edit']" matTooltip="Edit"><mat-icon>edit</mat-icon></a>
-            <button mat-icon-button color="warn" (click)="delete(row)" matTooltip="Delete"><mat-icon>delete</mat-icon></button>
-          </td>
-        </ng-container>
-        <tr mat-header-row *matHeaderRowDef="cols"></tr>
-        <tr mat-row *matRowDef="let row; columns: cols;"></tr>
-      </table>
-      <mat-paginator [length]="total" [pageSize]="pageSize" [pageSizeOptions]="[10,25,50]" (page)="onPage($event)"></mat-paginator>
-    </div>
+    <app-data-table
+      title="Services"
+      createButtonText="New Service"
+      [columns]="columns"
+      [actions]="actions"
+      [filters]="filters"
+      [items]="items"
+      [loading]="loading"
+      [totalElements]="totalElements"
+      [pageSize]="pageSize"
+      [currentPage]="currentPage"
+      emptyMessage="No services found"
+      emptyIcon="design_services"
+      (pageChange)="onPageChange($event)"
+      (actionClick)="onActionClick($event)"
+      (toggleChange)="onToggleChange($event)"
+      (filterChange)="onFilterChange($event)"
+      (createClick)="navigateToCreate()">
+    </app-data-table>
   `
 })
 export class ServicesListComponent implements OnInit {
-  private svc = inject(ServiceService);
-  private snack = inject(MatSnackBar);
-  private dialog = inject(MatDialog);
+  private serviceService = inject(ServiceService);
+  private snackBar = inject(MatSnackBar);
   private cdr = inject(ChangeDetectorRef);
-  private zone = inject(NgZone);
+  private destroy$ = new Subject<void>();
 
-  items: ServiceResponse[] = [];
-  cols = ['cover', 'title', 'status', 'order', 'actions'];
-  loading = false;
-  keyword = '';
-  page = 0; pageSize = 10; total = 0;
-  private timer: any;
-
-  ngOnInit() { this.load(); }
-
-  load() {
-    this.zone.run(() => {
-      this.loading = true;
-      this.cdr.markForCheck();
-    });
-    
-    console.log('🔄 Loading services...');
-    
-    this.svc.getAll(this.keyword || undefined, this.page, this.pageSize).subscribe({
-      next: r => { 
-        console.log('✅ Services loaded', r);
-        this.zone.run(() => {
-          this.items = r.data?.content || []; 
-          this.total = r.data?.totalElements || 0; 
-          this.loading = false; 
-          this.cdr.markForCheck();
-          console.log('🎯 Loading state:', this.loading);
-        });
-      },
-      error: err => { 
-        console.error('❌ Services load error', err);
-        this.zone.run(() => {
-          this.loading = false;
-          this.cdr.markForCheck();
-          this.snack.open('Error loading services: ' + (err.error?.message || err.message || 'Unknown error'), '', { duration: 5000 });
-        });
+  columns: TableColumn[] = [
+    {
+      key: 'coverMedia.url',
+      label: 'Cover',
+      type: 'image',
+      width: '80px',
+      imageProperty: 'coverMedia.url'
+    },
+    {
+      key: 'title',
+      label: 'Title',
+      type: 'text'
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      type: 'badge',
+      badgeConfig: {
+        'published': { class: 'published', label: 'Published' },
+        'draft': { class: 'draft', label: 'Draft' }
       }
-    });
+    },
+    {
+      key: 'displayOrder',
+      label: 'Order',
+      type: 'number'
+    },
+    {
+      key: 'createdAt',
+      label: 'Created',
+      type: 'date'
+    }
+  ];
+
+  actions: TableAction[] = [
+    { key: 'edit', label: 'Edit', icon: 'edit', color: 'primary', tooltip: 'Edit service' },
+    { key: 'delete', label: 'Delete', icon: 'delete', color: 'warn', tooltip: 'Delete service' }
+  ];
+
+  filters: FilterOption[] = [
+    {
+      key: 'status',
+      label: 'Status',
+      type: 'select',
+      options: [
+        { value: 'published', label: 'Published' },
+        { value: 'draft', label: 'Draft' }
+      ]
+    }
+  ];
+
+  // Data properties
+  items: ServiceResponse[] = [];
+  totalElements = 0;
+  pageSize = 10;
+  currentPage = 0;
+  loading = false;
+  filterValues: any = {};
+
+  ngOnInit() {
+    this.loadData();
   }
 
-  onSearch() { clearTimeout(this.timer); this.timer = setTimeout(() => { this.page = 0; this.load(); }, 400); }
-  onPage(e: PageEvent) { this.page = e.pageIndex; this.pageSize = e.pageSize; this.load(); }
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
-  delete(row: ServiceResponse) {
-    this.dialog.open(ConfirmDialogComponent, { data: { title: 'Delete Service', message: `Delete "${row.title}"?` } })
-      .afterClosed().subscribe(ok => {
-        if (!ok) return;
-        this.svc.delete(row.id).subscribe({ next: () => { this.snack.open('Deleted', '', { duration: 2000 }); this.load(); } });
+  loadData() {
+    this.loading = true;
+    const params = {
+      ...this.filterValues,
+      page: this.currentPage,
+      size: this.pageSize
+    };
+
+    this.serviceService.getAll(params)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => {
+          this.loading = false;
+          this.cdr.detectChanges();
+        })
+      )
+      .subscribe({
+        next: (response) => {
+          if (response.success) {
+            this.items = response.data.content;
+            this.totalElements = response.data.totalElements;
+          } else {
+            this.showError('Failed to load services');
+          }
+        },
+        error: (error) => {
+          console.error('Load error:', error);
+          this.showError(error.error?.message || 'Failed to load services');
+        }
       });
+  }
+
+  onPageChange(event: PageEvent) {
+    this.currentPage = event.pageIndex;
+    this.pageSize = event.pageSize;
+    this.loadData();
+  }
+
+  onActionClick(event: { action: string; item: ServiceResponse }) {
+    switch (event.action) {
+      case 'edit':
+        window.location.href = `/services/${event.item.id}/edit`;
+        break;
+      case 'delete':
+        this.deleteItem(event.item);
+        break;
+    }
+  }
+
+  onToggleChange(event: { item: ServiceResponse; field: string; value: boolean }) {
+    // Handle toggle changes if needed
+  }
+
+  onFilterChange(filters: any) {
+    this.filterValues = filters;
+    this.currentPage = 0;
+    this.loadData();
+  }
+
+  navigateToCreate() {
+    window.location.href = '/services/new';
+  }
+
+  deleteItem(item: ServiceResponse) {
+    this.serviceService.delete(item.id!)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          if (response.success) {
+            this.showSuccess('Service deleted successfully');
+            this.loadData();
+          } else {
+            this.showError(response.message || 'Delete failed');
+          }
+        },
+        error: (error) => {
+          console.error('Delete error:', error);
+          this.showError(error.error?.message || 'Delete failed');
+        }
+      });
+  }
+
+  private showSuccess(message: string) {
+    this.snackBar.open(message, 'Close', { duration: 3000 });
+  }
+
+  private showError(message: string) {
+    this.snackBar.open(message, 'Close', { duration: 5000 });
   }
 }
