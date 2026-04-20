@@ -18,20 +18,19 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        // Disabled — use manual SQL insert instead
-        // if (!adminRepository.existsByEmail("admin@yc.com")) {
-        //     Admin admin = Admin.builder()
-        //             .name("Admin")
-        //             .email("admin@yc.com")
-        //             .password(passwordEncoder.encode("admin123"))
-        //             .isActive(true)
-        //             .loginAttempts(0)
-        //             .build();
-        //     adminRepository.save(admin);
-        //     log.info("✅ Default admin created — email: admin@yc.com | password: admin123");
-        // } else {
-        //     log.info("ℹ️  Admin already exists, skipping seed.");
-        // }
+        if (!adminRepository.existsByEmail("admin@yc.com")) {
+            Admin admin = Admin.builder()
+                    .name("Admin")
+                    .email("admin@yc.com")
+                    .password(passwordEncoder.encode("admin123"))
+                    .isActive(true)
+                    .loginAttempts(0)
+                    .build();
+            adminRepository.save(admin);
+            log.info("✅ Default admin created — email: admin@yc.com | password: admin123");
+        } else {
+            log.info("ℹ️  Admin already exists, skipping seed.");
+        }
         
         long count = adminRepository.count();
         log.info("ℹ️  Found {} admin(s) in database", count);

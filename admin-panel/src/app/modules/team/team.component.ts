@@ -1,19 +1,18 @@
-import { Component, OnInit, inject, ChangeDetectorRef, NgZone } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { MatTableModule } from '@angular/material/table';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatDialogModule, MatDialog } from '@angular/material/dialog';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { MiscService } from '../../core/services/misc.service';
-import { TeamMemberResponse } from '../../core/models/misc.model';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { PageEvent } from '@angular/material/paginator';
+import { Subject, takeUntil, finalize } from 'rxjs';
+import { DataTableComponent, TableColumn, TableAction } from '../../shared/data-table/data-table.component';
 import { MediaPickerComponent } from '../../shared/media-picker/media-picker.component';
-import { ConfirmDialogComponent } from '../../shared/confirm-dialog/confirm-dialog.component';
+import { TeamService } from '../../core/services/team.service';
+import { TeamMemberResponse, TeamMemberRequest } from '../../core/models/misc.model';
 import { MediaResponse } from '../../core/models/media.model';
 
 @Component({
@@ -21,169 +20,346 @@ import { MediaResponse } from '../../core/models/media.model';
   standalone: true,
   imports: [
     CommonModule, ReactiveFormsModule,
-    MatTableModule, MatButtonModule, MatIconModule,
-    MatFormFieldModule, MatInputModule, MatDialogModule,
-    MatSnackBarModule, MatProgressSpinnerModule, MatPaginatorModule,
-    MediaPickerComponent
+    MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule,
+    DataTableComponent, MediaPickerComponent
   ],
   template: `
-    <div class="page-header">
-      <h1>Team Members</h1>
-      <button mat-flat-button color="primary" (click)="openForm()"><mat-icon>add</mat-icon> Add Member</button>
-    </div>
+    <app-data-table
+      title="Team Members"
+      createButtonText="Add Member"
+      [columns]="columns"
+      [actions]="actions"
+      [items]="items"
+      [loading]="loading"
+      [totalElements]="totalElements"
+      [pageSize]="pageSize"
+      [currentPage]="currentPage"
+      emptyMessage="No team members found"
+      emptyIcon="group"
+      (pageChange)="onPageChange($event)"
+      (actionClick)="onActionClick($event)"
+      (toggleChange)="onToggleChange($event)"
+      (createClick)="openForm()">
+    </app-data-table>
 
-    <div class="table-container">
-      <div *ngIf="loading" style="display:flex;justify-content:center;padding:40px"><mat-spinner diameter="40"></mat-spinner></div>
-      <table mat-table [dataSource]="items" *ngIf="!loading">
-        <ng-container matColumnDef="photo">
-          <th mat-header-cell *matHeaderCellDef>Photo</th>
-          <td mat-cell *matCellDef="let row">
-            <img *ngIf="row.media" [src]="row.media.url" class="thumb" style="border-radius:50%" [alt]="row.name">
-            <mat-icon *ngIf="!row.media" style="color:#ccc">person</mat-icon>
-          </td>
-        </ng-container>
-        <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef>Name</th>
-          <td mat-cell *matCellDef="let row"><strong>{{ row.name }}</strong></td>
-        </ng-container>
-        <ng-container matColumnDef="designation">
-          <th mat-header-cell *matHeaderCellDef>Designation</th>
-          <td mat-cell *matCellDef="let row">{{ row.designation }}</td>
-        </ng-container>
-        <ng-container matColumnDef="order">
-          <th mat-header-cell *matHeaderCellDef>Order</th>
-          <td mat-cell *matCellDef="let row">{{ row.displayOrder }}</td>
-        </ng-container>
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef>Actions</th>
-          <td mat-cell *matCellDef="let row">
-            <button mat-icon-button (click)="openForm(row)"><mat-icon>edit</mat-icon></button>
-            <button mat-icon-button color="warn" (click)="delete(row)"><mat-icon>delete</mat-icon></button>
-          </td>
-        </ng-container>
-        <tr mat-header-row *matHeaderRowDef="cols"></tr>
-        <tr mat-row *matRowDef="let row; columns: cols;"></tr>
-      </table>
-      <mat-paginator [length]="total" [pageSize]="pageSize" [pageSizeOptions]="[10,25]" (page)="onPage($event)"></mat-paginator>
-    </div>
-
-    <!-- Inline Form Panel -->
-    <div class="card mt-24" *ngIf="showForm">
-      <h3 style="margin-bottom:16px">{{ editItem ? 'Edit Member' : 'Add Member' }}</h3>
-      <form [formGroup]="form" (ngSubmit)="submit()">
+    <!-- Inline Form -->
+    <div *ngIf="showForm" class="form-container">
+      <div class="form-header">
+        <h3>{{ editingItem ? 'Edit' : 'Add' }} Team Member</h3>
+        <button mat-icon-button (click)="closeForm()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      <form [formGroup]="form" (ngSubmit)="submitForm()">
         <div class="form-grid">
           <mat-form-field appearance="outline">
             <mat-label>Name *</mat-label>
-            <input matInput formControlName="name">
-            <mat-error>Required</mat-error>
+            <input matInput formControlName="name" placeholder="Enter member name">
+            <mat-error>Name is required</mat-error>
           </mat-form-field>
+
           <mat-form-field appearance="outline">
-            <mat-label>Designation</mat-label>
-            <input matInput formControlName="designation">
+            <mat-label>Designation *</mat-label>
+            <input matInput formControlName="designation" placeholder="Enter designation">
+            <mat-error>Designation is required</mat-error>
           </mat-form-field>
+
           <mat-form-field appearance="outline">
             <mat-label>Display Order</mat-label>
-            <input matInput type="number" formControlName="displayOrder">
+            <input matInput type="number" formControlName="displayOrder" placeholder="0">
           </mat-form-field>
-          <div>
-            <label style="font-size:13px;color:#757575;display:block;margin-bottom:8px">Photo</label>
-            <app-media-picker [value]="memberMedia" category="team" (valueChange)="memberMedia = $event"></app-media-picker>
+
+          <div class="form-full">
+            <label class="form-label">Photo</label>
+            <app-media-picker 
+              [value]="memberMedia" 
+              category="team" 
+              (valueChange)="memberMedia = $event">
+            </app-media-picker>
           </div>
         </div>
-        <div style="display:flex;gap:12px;margin-top:16px">
-          <button mat-flat-button color="primary" type="submit" [disabled]="saving">
-            <mat-spinner *ngIf="saving" diameter="20"></mat-spinner>
-            <span *ngIf="!saving">{{ editItem ? 'Update' : 'Add' }}</span>
+        
+        <div class="form-actions">
+          <button mat-button type="button" (click)="closeForm()">Cancel</button>
+          <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || submitting">
+            <mat-spinner diameter="20" *ngIf="submitting"></mat-spinner>
+            {{ editingItem ? 'Update' : 'Create' }}
           </button>
-          <button mat-button type="button" (click)="cancelForm()">Cancel</button>
         </div>
       </form>
     </div>
-  `
+  `,
+  styles: [`
+    .form-container {
+      background: var(--surface);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      margin-top: 24px;
+      overflow: hidden;
+    }
+
+    .form-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface-alt);
+      
+      h3 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 500;
+        color: var(--text);
+      }
+    }
+
+    form {
+      padding: 24px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+      
+      @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .form-full {
+      grid-column: 1 / -1;
+    }
+
+    .form-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+  `]
 })
 export class TeamComponent implements OnInit {
-  private svc = inject(MiscService);
-  private snack = inject(MatSnackBar);
-  private dialog = inject(MatDialog);
+  private teamService = inject(TeamService);
+  private snackBar = inject(MatSnackBar);
   private fb = inject(FormBuilder);
   private cdr = inject(ChangeDetectorRef);
-  private zone = inject(NgZone);
+  private destroy$ = new Subject<void>();
 
+  // Table configuration
+  columns: TableColumn[] = [
+    {
+      key: 'media.url',
+      label: 'Photo',
+      type: 'image',
+      width: '80px',
+      imageProperty: 'media.url'
+    },
+    {
+      key: 'name',
+      label: 'Name',
+      type: 'text'
+    },
+    {
+      key: 'designation',
+      label: 'Designation',
+      type: 'text'
+    },
+    {
+      key: 'displayOrder',
+      label: 'Order',
+      type: 'number'
+    }
+  ];
+
+  actions: TableAction[] = [
+    { key: 'edit', label: 'Edit', icon: 'edit', color: 'primary', tooltip: 'Edit member' },
+    { key: 'delete', label: 'Delete', icon: 'delete', color: 'warn', tooltip: 'Delete member' }
+  ];
+
+  // Data properties
   items: TeamMemberResponse[] = [];
-  cols = ['photo', 'name', 'designation', 'order', 'actions'];
+  totalElements = 0;
+  pageSize = 10;
+  currentPage = 0;
   loading = false;
-  page = 0; pageSize = 10; total = 0;
-  showForm = false;
-  saving = false;
-  editItem: TeamMemberResponse | null = null;
-  memberMedia: MediaResponse | null = null;
 
+  // Form properties
+  showForm = false;
+  submitting = false;
+  editingItem: TeamMemberResponse | null = null;
+  memberMedia: MediaResponse | null = null;
+  
   form = this.fb.group({
     name: ['', Validators.required],
-    designation: [''],
+    designation: ['', Validators.required],
     displayOrder: [0]
   });
 
-  ngOnInit() { this.load(); }
+  ngOnInit() {
+    this.loadData();
+  }
 
-  load() {
-    this.zone.run(() => {
-      this.loading = true;
-      this.cdr.markForCheck();
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  loadData() {
+    this.loading = true;
+    const params = {
+      page: this.currentPage,
+      size: this.pageSize
+    };
+
+    this.teamService.getAll(params)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => {
+          this.loading = false;
+          this.cdr.detectChanges();
+        })
+      )
+      .subscribe({
+        next: (response) => {
+          if (response.success) {
+            this.items = response.data.content;
+            this.totalElements = response.data.totalElements;
+          } else {
+            this.showError('Failed to load team members');
+          }
+        },
+        error: (error) => {
+          console.error('Load error:', error);
+          this.showError(error.error?.message || 'Failed to load team members');
+        }
+      });
+  }
+
+  onPageChange(event: PageEvent) {
+    this.currentPage = event.pageIndex;
+    this.pageSize = event.pageSize;
+    this.loadData();
+  }
+
+  onActionClick(event: { action: string; item: TeamMemberResponse }) {
+    switch (event.action) {
+      case 'edit':
+        this.editItem(event.item);
+        break;
+      case 'delete':
+        this.deleteItem(event.item);
+        break;
+    }
+  }
+
+  onToggleChange(event: { item: TeamMemberResponse; field: string; value: boolean }) {
+    // Handle toggle changes if needed
+  }
+
+  openForm() {
+    this.editingItem = null;
+    this.memberMedia = null;
+    this.form.reset({ displayOrder: 0 });
+    this.showForm = true;
+  }
+
+  editItem(item: TeamMemberResponse) {
+    this.editingItem = item;
+    this.memberMedia = item.media || null;
+    this.form.patchValue({
+      name: item.name,
+      designation: item.designation,
+      displayOrder: item.displayOrder
     });
+    this.showForm = true;
+  }
+
+  closeForm() {
+    this.showForm = false;
+    this.editingItem = null;
+    this.memberMedia = null;
+    this.form.reset();
+  }
+
+  submitForm() {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    this.submitting = true;
+    const formValue = this.form.value;
+    const request: TeamMemberRequest = {
+      name: formValue.name!,
+      designation: formValue.designation!,
+      displayOrder: formValue.displayOrder || 0,
+      mediaId: this.memberMedia?.id
+    };
+
+    const operation = this.editingItem 
+      ? this.teamService.update(this.editingItem.id!, request)
+      : this.teamService.create(request);
     
-    this.svc.getTeamMembers(this.page, this.pageSize).subscribe({
-      next: r => {
-        this.zone.run(() => {
-          this.items = r.data?.content || [];
-          this.total = r.data?.totalElements || 0;
-          this.loading = false;
-          this.cdr.markForCheck();
-        });
+    operation.pipe(
+      takeUntil(this.destroy$),
+      finalize(() => {
+        this.submitting = false;
+        this.cdr.detectChanges();
+      })
+    ).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.showSuccess(this.editingItem ? 'Member updated successfully' : 'Member created successfully');
+          this.closeForm();
+          this.loadData();
+        } else {
+          this.showError(response.message || 'Operation failed');
+        }
       },
-      error: () => {
-        this.zone.run(() => {
-          this.loading = false;
-          this.cdr.markForCheck();
-        });
+      error: (error) => {
+        console.error('Submit error:', error);
+        this.showError(error.error?.message || 'Operation failed');
       }
     });
   }
 
-  onPage(e: PageEvent) { this.page = e.pageIndex; this.pageSize = e.pageSize; this.load(); }
-
-  openForm(item?: TeamMemberResponse) {
-    this.editItem = item || null;
-    this.showForm = true;
-    if (item) {
-      this.form.patchValue({ name: item.name, designation: item.designation, displayOrder: item.displayOrder });
-      this.memberMedia = item.media || null;
-    } else {
-      this.form.reset({ displayOrder: 0 });
-      this.memberMedia = null;
-    }
-  }
-
-  cancelForm() { this.showForm = false; this.editItem = null; }
-
-  submit() {
-    if (this.form.invalid) { this.form.markAllAsTouched(); return; }
-    this.saving = true;
-    const req = { ...this.form.value, mediaId: this.memberMedia?.id } as any;
-    const obs = this.editItem
-      ? this.svc.updateTeamMember(this.editItem.id, req)
-      : this.svc.createTeamMember(req);
-    obs.subscribe({
-      next: () => { this.snack.open('Saved!', '', { duration: 2000 }); this.saving = false; this.cancelForm(); this.load(); },
-      error: err => { this.saving = false; this.snack.open(err.error?.message || 'Error', '', { duration: 3000 }); }
-    });
-  }
-
-  delete(row: TeamMemberResponse) {
-    this.dialog.open(ConfirmDialogComponent, { data: { title: 'Delete', message: `Delete "${row.name}"?` } })
-      .afterClosed().subscribe(ok => {
-        if (!ok) return;
-        this.svc.deleteTeamMember(row.id).subscribe({ next: () => { this.snack.open('Deleted', '', { duration: 2000 }); this.load(); } });
+  deleteItem(item: TeamMemberResponse) {
+    this.teamService.delete(item.id!)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          if (response.success) {
+            this.showSuccess('Member deleted successfully');
+            this.loadData();
+          } else {
+            this.showError(response.message || 'Delete failed');
+          }
+        },
+        error: (error) => {
+          console.error('Delete error:', error);
+          this.showError(error.error?.message || 'Delete failed');
+        }
       });
+  }
+
+  private showSuccess(message: string) {
+    this.snackBar.open(message, 'Close', { duration: 3000 });
+  }
+
+  private showError(message: string) {
+    this.snackBar.open(message, 'Close', { duration: 5000 });
   }
 }
