@@ -1,0 +1,330 @@
+@use '@angular/material' as mat;
+
+// ─── Local Fonts ──────────────────────────────────────────────────────────────
+/* Roboto Font - Local */
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: local('Roboto Light'), local('Roboto-Light'),
+       url('/assets/fonts/roboto-v30-latin-300.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Roboto'), local('Roboto-Regular'),
+       url('/assets/fonts/roboto-v30-latin-regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: local('Roboto Medium'), local('Roboto-Medium'),
+       url('/assets/fonts/roboto-v30-latin-500.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Roboto Bold'), local('Roboto-Bold'),
+       url('/assets/fonts/roboto-v30-latin-700.woff2') format('woff2');
+}
+
+/* Material Icons - Local */
+@font-face {
+  font-family: 'Material Icons';
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: local('Material Icons'),
+       local('MaterialIcons-Regular'),
+       url('/assets/fonts/material-icons-v140.woff2') format('woff2');
+}
+
+.material-icons {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: 'liga';
+}
+
+// ─── Matcha Green Theme ───────────────────────────────────────────────────────
+$primary: mat.m2-define-palette(mat.$m2-green-palette, 700, 400, 900);
+$accent:  mat.m2-define-palette(mat.$m2-amber-palette, A200, A100, A400);
+$warn:    mat.m2-define-palette(mat.$m2-red-palette);
+
+$theme: mat.m2-define-light-theme((
+  color: (primary: $primary, accent: $accent, warn: $warn),
+  typography: mat.m2-define-typography-config(),
+  density: 0,
+));
+
+@include mat.all-component-themes($theme);
+
+// ─── CSS Variables ────────────────────────────────────────────────────────────
+:root {
+  --matcha:        #388e3c;
+  --matcha-dark:   #1b5e20;
+  --matcha-light:  #81c784;
+  --sidebar-w:     260px;
+  --sidebar-w-col: 64px;
+  --navbar-h:      64px;
+  --bg:            #f5f7fa;
+  --surface:       #ffffff;
+  --border:        #e0e0e0;
+  --text:          #212121;
+  --text-muted:    #757575;
+  --shadow:        0 2px 8px rgba(0,0,0,.08);
+}
+
+// ─── Dark Mode ────────────────────────────────────────────────────────────────
+.dark-mode {
+  --bg:      #121212;
+  --surface: #1e1e1e;
+  --border:  #333;
+  --text:    #e0e0e0;
+  --text-muted: #9e9e9e;
+  --shadow:  0 2px 8px rgba(0,0,0,.4);
+  background: var(--bg);
+  color: var(--text);
+}
+
+// ─── Reset / Base ─────────────────────────────────────────────────────────────
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  font-family: 'Roboto', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+}
+
+a { text-decoration: none; color: inherit; }
+
+// ─── Layout ───────────────────────────────────────────────────────────────────
+.admin-layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  margin-left: var(--sidebar-w);
+  transition: margin-left .3s ease;
+
+  &.collapsed { margin-left: var(--sidebar-w-col); }
+}
+
+.page-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  background: var(--bg);
+}
+
+// ─── Cards ────────────────────────────────────────────────────────────────────
+.card {
+  background: var(--surface);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 24px;
+  border: 1px solid var(--border);
+}
+
+.stat-card {
+  @extend .card;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  .stat-icon {
+    width: 56px; height: 56px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+    &.green  { background: #e8f5e9; color: var(--matcha); }
+    &.blue   { background: #e3f2fd; color: #1976d2; }
+    &.orange { background: #fff3e0; color: #f57c00; }
+    &.purple { background: #f3e5f5; color: #7b1fa2; }
+    &.red    { background: #ffebee; color: #c62828; }
+    &.teal   { background: #e0f2f1; color: #00796b; }
+  }
+  .stat-info {
+    h3 { font-size: 28px; font-weight: 700; color: var(--text); }
+    p  { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+  }
+}
+
+// ─── Page Header ─────────────────────────────────────────────────────────────
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  h1 { font-size: 22px; font-weight: 600; color: var(--text); }
+}
+
+// ─── Table ────────────────────────────────────────────────────────────────────
+.table-container {
+  @extend .card;
+  padding: 0;
+  overflow: hidden;
+}
+
+.filter-bar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+  background: var(--surface);
+
+  mat-form-field { flex: 1; min-width: 200px; }
+}
+
+table.mat-mdc-table {
+  width: 100%;
+  background: var(--surface) !important;
+}
+
+.mat-mdc-row:hover { background: rgba(56,142,60,.04); }
+
+.thumb {
+  width: 48px; height: 48px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid var(--border);
+}
+
+// ─── Badges ───────────────────────────────────────────────────────────────────
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  &.published { background: #e8f5e9; color: #2e7d32; }
+  &.draft     { background: #fff3e0; color: #e65100; }
+  &.featured  { background: #e3f2fd; color: #1565c0; }
+  &.active    { background: #e8f5e9; color: #2e7d32; }
+  &.inactive  { background: #fce4ec; color: #c62828; }
+  &.unread    { background: #fce4ec; color: #c62828; }
+  &.read      { background: #f5f5f5; color: #757575; }
+}
+
+// ─── Forms ────────────────────────────────────────────────────────────────────
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  @media (max-width: 768px) { grid-template-columns: 1fr; }
+}
+
+.form-full { grid-column: 1 / -1; }
+
+// ─── Image Upload ─────────────────────────────────────────────────────────────
+.upload-zone {
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  padding: 32px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color .2s, background .2s;
+  background: var(--bg);
+
+  &:hover, &.drag-over {
+    border-color: var(--matcha);
+    background: #f1f8e9;
+  }
+
+  mat-icon { font-size: 48px; width: 48px; height: 48px; color: var(--text-muted); }
+  p { color: var(--text-muted); margin-top: 8px; font-size: 13px; }
+}
+
+.preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+
+  .preview-item {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    aspect-ratio: 1;
+
+    img { width: 100%; height: 100%; object-fit: cover; }
+
+    .remove-btn {
+      position: absolute; top: 4px; right: 4px;
+      background: rgba(0,0,0,.6);
+      border: none; border-radius: 50%;
+      width: 24px; height: 24px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: white;
+      mat-icon { font-size: 16px; width: 16px; height: 16px; }
+    }
+  }
+}
+
+// ─── Stars ────────────────────────────────────────────────────────────────────
+.stars {
+  color: #ffc107;
+  font-size: 18px;
+  letter-spacing: 2px;
+}
+
+// ─── Spinner overlay ─────────────────────────────────────────────────────────
+.spinner-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.3);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 9999;
+}
+
+// ─── Responsive ───────────────────────────────────────────────────────────────
+@media (max-width: 768px) {
+  .main-content { margin-left: 0 !important; }
+  .page-content { padding: 16px; }
+}
+
+// ─── Scrollbar ────────────────────────────────────────────────────────────────
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #bdbdbd; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #9e9e9e; }
+
+// ─── Misc ─────────────────────────────────────────────────────────────────────
+.text-muted { color: var(--text-muted); }
+.mt-16 { margin-top: 16px; }
+.mt-24 { margin-top: 24px; }
+.gap-8 { gap: 8px; }
+.flex { display: flex; }
+.flex-center { display: flex; align-items: center; }
+.flex-between { display: flex; align-items: center; justify-content: space-between; }

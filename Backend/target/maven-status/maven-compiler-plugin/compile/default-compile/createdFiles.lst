@@ -22,6 +22,7 @@ com\yc\interior\service\ContactMessageService.class
 com\yc\interior\repository\ClientRepository.class
 com\yc\interior\dto\response\SettingsResponse.class
 com\yc\interior\dto\response\ApiResponse.class
+com\yc\interior\config\DataInitializer.class
 com\yc\interior\dto\response\TeamMemberResponse$TeamMemberResponseBuilder.class
 com\yc\interior\service\impl\ContactMessageServiceImpl.class
 com\yc\interior\dto\request\PostCategoryRequest.class
