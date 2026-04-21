@@ -28,7 +28,7 @@ import { MediaResponse } from '../../../core/models/media.model';
   template: `
     <div class="page-header">
       <h1>{{ isEdit ? 'Edit Project' : 'New Project' }}</h1>
-      <a mat-button routerLink="/projects"><mat-icon>arrow_back</mat-icon> Back</a>
+      <a mat-button routerLink="/admin/projects"><mat-icon>arrow_back</mat-icon> Back</a>
     </div>
 
     <div class="card">
@@ -67,19 +67,20 @@ import { MediaResponse } from '../../../core/models/media.model';
           </mat-form-field>
 
           <div>
-            <label class="field-label">Cover Image</label>
+            <label class="field-label">Cover Image *</label>
             <app-media-picker
               [value]="coverMedia"
               category="project"
               (valueChange)="onCoverChange($event)">
             </app-media-picker>
+            <div *ngIf="showCoverError" class="error-message">Cover image is required</div>
           </div>
 
           <div>
             <mat-checkbox formControlName="isFeatured" color="primary">Featured</mat-checkbox>
             <mat-form-field appearance="outline" style="margin-top:8px;width:100%">
               <mat-label>Display Order</mat-label>
-              <input matInput type="number" formControlName="displayOrder">
+              <input matInput type="number" formControlName="displayOrder" min="0" step="1">
             </mat-form-field>
           </div>
 
@@ -105,13 +106,14 @@ import { MediaResponse } from '../../../core/models/media.model';
             <mat-spinner *ngIf="saving" diameter="20"></mat-spinner>
             <span *ngIf="!saving">{{ isEdit ? 'Update' : 'Create' }}</span>
           </button>
-          <a mat-button routerLink="/projects">Cancel</a>
+          <a mat-button routerLink="/admin/projects">Cancel</a>
         </div>
       </form>
     </div>
   `,
   styles: [`
     .field-label { font-size: 13px; color: var(--text-muted); display: block; margin-bottom: 8px; }
+    .error-message { color: #c62828; font-size: 12px; margin-top: 4px; }
     .add-image-btn {
       border: 2px dashed var(--border); border-radius: 8px;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -145,6 +147,7 @@ export class ProjectFormComponent implements OnInit {
   additionalImages: MediaResponse[] = [];
   isEdit = false;
   saving = false;
+  showCoverError = false;
   private editId: number | null = null;
 
   ngOnInit() {
@@ -177,6 +180,14 @@ export class ProjectFormComponent implements OnInit {
 
   submit() {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
+    
+    // Validate cover image
+    if (!this.coverMedia) {
+      this.showCoverError = true;
+      return;
+    }
+    this.showCoverError = false;
+    
     this.saving = true;
     const req = {
       ...this.form.value,
@@ -191,7 +202,7 @@ export class ProjectFormComponent implements OnInit {
     obs.subscribe({
       next: () => {
         this.snack.open(this.isEdit ? 'Updated!' : 'Created!', '', { duration: 2000 });
-        this.router.navigate(['/projects']);
+        this.router.navigate(['/admin/projects']);
       },
       error: err => {
         this.saving = false;

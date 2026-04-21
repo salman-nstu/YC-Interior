@@ -242,7 +242,6 @@ export class SidebarComponent {
     { label: 'Projects',         icon: 'business',        route: '/admin/projects' },
     { label: 'Services',         icon: 'design_services', route: '/admin/services' },
     { label: 'Gallery',          icon: 'photo_library',   route: '/admin/gallery' },
-    { label: 'Media',            icon: 'perm_media',      route: '/admin/media' },
     { label: 'Posts',            icon: 'article',         route: '/admin/posts' },
     { label: 'Team',             icon: 'group',           route: '/admin/team' },
     { label: 'Clients',          icon: 'handshake',       route: '/admin/clients' },

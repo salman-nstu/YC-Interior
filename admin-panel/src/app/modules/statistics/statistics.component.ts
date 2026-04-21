@@ -66,7 +66,7 @@ import { ConfirmDialogComponent } from '../../shared/confirm-dialog/confirm-dial
           </mat-form-field>
           <mat-form-field appearance="outline">
             <mat-label>Display Order</mat-label>
-            <input matInput type="number" formControlName="displayOrder">
+            <input matInput type="number" formControlName="displayOrder" min="0" step="1">
           </mat-form-field>
         </div>
         <div style="display:flex;gap:12px;margin-top:16px">

@@ -152,7 +152,7 @@ export class ServicesListComponent implements OnInit {
   onActionClick(event: { action: string; item: ServiceResponse }) {
     switch (event.action) {
       case 'edit':
-        window.location.href = `/services/${event.item.id}/edit`;
+        window.location.href = `/admin/services/${event.item.id}/edit`;
         break;
       case 'delete':
         this.deleteItem(event.item);
@@ -171,7 +171,7 @@ export class ServicesListComponent implements OnInit {
   }
 
   navigateToCreate() {
-    window.location.href = '/services/new';
+    window.location.href = '/admin/services/new';
   }
 
   deleteItem(item: ServiceResponse) {
