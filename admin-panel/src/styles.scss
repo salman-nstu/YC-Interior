@@ -378,9 +378,245 @@ table.mat-mdc-table {
 }
 
 // ─── Responsive ───────────────────────────────────────────────────────────────
-@media (max-width: 768px) {
-  .main-content { margin-left: 0 !important; }
-  .page-content { padding: 16px; }
+// Mobile breakpoints
+$mobile: 480px;
+$tablet: 768px;
+$desktop: 1200px;
+
+// Sidebar mobile behavior
+@media (max-width: $tablet) {
+  .main-content { 
+    margin-left: 0 !important; 
+  }
+  
+  .page-content { 
+    padding: 12px; 
+  }
+  
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    
+    h1 { font-size: 20px; }
+    
+    button, a {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+}
+
+// Mobile-specific adjustments
+@media (max-width: $mobile) {
+  .page-content { 
+    padding: 8px; 
+  }
+  
+  .page-header h1 { 
+    font-size: 18px; 
+  }
+}
+
+// Stats grid responsive
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+  
+  @media (max-width: $tablet) {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+  }
+  
+  @media (max-width: $mobile) {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
+
+// Summary row responsive
+.summary-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  
+  @media (max-width: $tablet) {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+// Gallery grid responsive
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+  
+  @media (max-width: $tablet) {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+  }
+  
+  @media (max-width: $mobile) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+}
+
+// Media grid responsive
+.media-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+  
+  @media (max-width: $tablet) {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+  }
+  
+  @media (max-width: $mobile) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+}
+
+// Table responsive
+.table-container {
+  @media (max-width: $tablet) {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    
+    table {
+      min-width: 600px;
+    }
+  }
+}
+
+// Filter bar responsive
+.filter-bar {
+  @media (max-width: $tablet) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    
+    mat-form-field {
+      width: 100%;
+      min-width: unset;
+    }
+    
+    button {
+      width: 100%;
+    }
+  }
+}
+
+// Card responsive
+.card {
+  @media (max-width: $tablet) {
+    padding: 16px;
+    border-radius: 8px;
+  }
+  
+  @media (max-width: $mobile) {
+    padding: 12px;
+  }
+}
+
+// Stat card responsive
+.stat-card {
+  @media (max-width: $mobile) {
+    padding: 12px;
+    gap: 12px;
+    
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      font-size: 24px;
+    }
+    
+    .stat-info {
+      h3 { font-size: 24px; }
+      p { font-size: 12px; }
+    }
+  }
+}
+
+// Form grid responsive (already added above but ensuring it's here)
+.form-grid {
+  @media (max-width: $tablet) {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+// Preview grid responsive
+.preview-grid {
+  @media (max-width: $tablet) {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 8px;
+  }
+  
+  @media (max-width: $mobile) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+// Touch-friendly buttons
+@media (max-width: $tablet) {
+  button[mat-icon-button],
+  button[mat-mini-fab] {
+    min-width: 48px;
+    min-height: 48px;
+  }
+  
+  button[mat-button],
+  button[mat-flat-button],
+  button[mat-raised-button],
+  button[mat-stroked-button] {
+    min-height: 48px;
+    padding: 0 20px;
+  }
+}
+
+// Navbar responsive
+.navbar {
+  @media (max-width: $tablet) {
+    padding: 0 12px;
+    
+    .page-title {
+      font-size: 14px;
+    }
+    
+    .admin-btn span {
+      display: none;
+    }
+  }
+}
+
+// Mini stats responsive
+.mini-stats {
+  @media (max-width: $mobile) {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+// Material table responsive
+.mat-mdc-table {
+  @media (max-width: $tablet) {
+    font-size: 12px;
+    
+    .mat-mdc-header-cell,
+    .mat-mdc-cell {
+      padding: 8px;
+    }
+    
+    .thumb {
+      width: 36px;
+      height: 36px;
+    }
+  }
 }
 
 // ─── Scrollbar ────────────────────────────────────────────────────────────────
@@ -401,3 +637,18 @@ table.mat-mdc-table {
 .flex { display: flex; }
 .flex-center { display: flex; align-items: center; }
 .flex-between { display: flex; align-items: center; justify-content: space-between; }
+
+// ─── Material Button Touch Target Fix ────────────────────────────────────────
+// Prevent Material button touch targets from overlapping other elements
+.mat-mdc-button-touch-target,
+.mat-mdc-icon-button .mat-mdc-button-touch-target {
+  pointer-events: none;
+}
+
+.mat-mdc-button,
+.mat-mdc-icon-button,
+.mat-mdc-raised-button,
+.mat-mdc-flat-button,
+.mat-mdc-stroked-button {
+  pointer-events: auto;
+}

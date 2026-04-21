@@ -30,7 +30,7 @@ import { ConfirmDialogComponent } from '../../../shared/confirm-dialog/confirm-d
   template: `
     <div class="page-header">
       <h1>Posts</h1>
-      <a mat-flat-button color="primary" routerLink="/posts/new"><mat-icon>add</mat-icon> New Post</a>
+      <a mat-flat-button color="primary" routerLink="/admin/posts/new"><mat-icon>add</mat-icon> New Post</a>
     </div>
     <div class="table-container">
       <div class="filter-bar">
@@ -82,7 +82,7 @@ import { ConfirmDialogComponent } from '../../../shared/confirm-dialog/confirm-d
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef>Actions</th>
           <td mat-cell *matCellDef="let row">
-            <a mat-icon-button [routerLink]="['/posts', row.id, 'edit']" matTooltip="Edit"><mat-icon>edit</mat-icon></a>
+            <a mat-icon-button [routerLink]="['/admin/posts', row.id, 'edit']" matTooltip="Edit"><mat-icon>edit</mat-icon></a>
             <button mat-icon-button color="warn" (click)="delete(row)" matTooltip="Delete"><mat-icon>delete</mat-icon></button>
           </td>
         </ng-container>

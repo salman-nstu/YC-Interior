@@ -6,7 +6,7 @@ export const authGuard: CanActivateFn = () => {
   const auth = inject(AuthService);
   const router = inject(Router);
   if (auth.isLoggedIn()) return true;
-  router.navigate(['/login']);
+  router.navigate(['/admin/login']);
   return false;
 };
 
@@ -14,6 +14,6 @@ export const guestGuard: CanActivateFn = () => {
   const auth = inject(AuthService);
   const router = inject(Router);
   if (!auth.isLoggedIn()) return true;
-  router.navigate(['/dashboard']);
+  router.navigate(['/admin/dashboard']);
   return false;
 };

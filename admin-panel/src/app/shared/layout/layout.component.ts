@@ -1,4 +1,4 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, inject, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { SidebarComponent } from '../sidebar/sidebar.component';
@@ -57,14 +57,45 @@ import { ThemeService } from '../../core/services/theme.service';
       .main-content.collapsed {
         margin-left: 0;
       }
+      
+      .page-content {
+        padding: 12px;
+      }
     }
   `]
 })
 export class LayoutComponent {
   themeService = inject(ThemeService);
-  sidebarCollapsed = signal(false);
+  sidebarCollapsed = signal(this.getInitialSidebarState());
 
   toggleSidebar() { 
     this.sidebarCollapsed.update(v => !v); 
+  }
+  
+  // Initialize sidebar state based on screen size
+  private getInitialSidebarState(): boolean {
+    if (typeof window !== 'undefined') {
+      // On mobile (<=768px), sidebar should be collapsed (hidden)
+      // On desktop, sidebar should be expanded (visible)
+      return window.innerWidth <= 768;
+    }
+    return false;
+  }
+  
+  // Handle window resize
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any) {
+    const isMobile = event.target.innerWidth <= 768;
+    const isDesktop = event.target.innerWidth > 768;
+    
+    // On mobile, ensure sidebar is collapsed (hidden) by default
+    if (isMobile && !this.sidebarCollapsed()) {
+      this.sidebarCollapsed.set(true);
+    }
+    
+    // On desktop, ensure sidebar is expanded (visible) by default
+    if (isDesktop && this.sidebarCollapsed()) {
+      this.sidebarCollapsed.set(false);
+    }
   }
 }
