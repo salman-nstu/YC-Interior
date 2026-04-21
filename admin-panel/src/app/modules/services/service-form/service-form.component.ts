@@ -26,7 +26,7 @@ import { MediaResponse } from '../../../core/models/media.model';
   template: `
     <div class="page-header">
       <h1>{{ isEdit ? 'Edit Service' : 'New Service' }}</h1>
-      <a mat-button routerLink="/services"><mat-icon>arrow_back</mat-icon> Back</a>
+      <a mat-button routerLink="/admin/services"><mat-icon>arrow_back</mat-icon> Back</a>
     </div>
     <div class="card">
       <form [formGroup]="form" (ngSubmit)="submit()">
@@ -49,11 +49,12 @@ import { MediaResponse } from '../../../core/models/media.model';
           </mat-form-field>
           <mat-form-field appearance="outline">
             <mat-label>Display Order</mat-label>
-            <input matInput type="number" formControlName="displayOrder">
+            <input matInput type="number" formControlName="displayOrder" min="0" step="1">
           </mat-form-field>
           <div>
-            <label style="font-size:13px;color:#757575;display:block;margin-bottom:8px">Cover Image</label>
+            <label style="font-size:13px;color:#757575;display:block;margin-bottom:8px">Cover Image *</label>
             <app-media-picker [value]="coverMedia" category="service" (valueChange)="coverMedia = $event"></app-media-picker>
+            <div *ngIf="showCoverError" style="color:#c62828;font-size:12px;margin-top:4px">Cover image is required</div>
           </div>
           <div>
             <mat-checkbox formControlName="isActive" color="primary">Active</mat-checkbox>
@@ -75,7 +76,7 @@ import { MediaResponse } from '../../../core/models/media.model';
             <mat-spinner *ngIf="saving" diameter="20"></mat-spinner>
             <span *ngIf="!saving">{{ isEdit ? 'Update' : 'Create' }}</span>
           </button>
-          <a mat-button routerLink="/services">Cancel</a>
+          <a mat-button routerLink="/admin/services">Cancel</a>
         </div>
       </form>
     </div>
@@ -100,6 +101,7 @@ export class ServiceFormComponent implements OnInit {
   additionalImages: MediaResponse[] = [];
   isEdit = false;
   saving = false;
+  showCoverError = false;
   private editId: number | null = null;
 
   ngOnInit() {
@@ -117,11 +119,19 @@ export class ServiceFormComponent implements OnInit {
 
   submit() {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
+    
+    // Validate cover image
+    if (!this.coverMedia) {
+      this.showCoverError = true;
+      return;
+    }
+    this.showCoverError = false;
+    
     this.saving = true;
     const req = { ...this.form.value, coverMediaId: this.coverMedia?.id, imageMediaIds: this.additionalImages.map(i => i.id) } as any;
     const obs = this.isEdit ? this.svc.update(this.editId!, req) : this.svc.create(req);
     obs.subscribe({
-      next: () => { this.snack.open(this.isEdit ? 'Updated!' : 'Created!', '', { duration: 2000 }); this.router.navigate(['/services']); },
+      next: () => { this.snack.open(this.isEdit ? 'Updated!' : 'Created!', '', { duration: 2000 }); this.router.navigate(['/admin/services']); },
       error: err => { this.saving = false; this.snack.open(err.error?.message || 'Error', '', { duration: 3000 }); }
     });
   }

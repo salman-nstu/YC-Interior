@@ -80,7 +80,7 @@ import { MediaResponse } from '../../core/models/media.model';
           </mat-form-field>
           <mat-form-field appearance="outline">
             <mat-label>Display Order</mat-label>
-            <input matInput type="number" formControlName="displayOrder">
+            <input matInput type="number" formControlName="displayOrder" min="0" step="1">
           </mat-form-field>
           <div>
             <label style="font-size:13px;color:#757575;display:block;margin-bottom:8px">Logo</label>

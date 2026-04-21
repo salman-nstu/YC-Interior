@@ -66,7 +66,7 @@ import { MediaResponse } from '../../core/models/media.model';
 
           <mat-form-field appearance="outline">
             <mat-label>Display Order</mat-label>
-            <input matInput type="number" formControlName="displayOrder" placeholder="0">
+            <input matInput type="number" formControlName="displayOrder" placeholder="0" min="0" step="1">
           </mat-form-field>
 
           <div class="form-full">

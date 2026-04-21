@@ -25,7 +25,7 @@ import { MediaResponse } from '../../../core/models/media.model';
   template: `
     <div class="page-header">
       <h1>{{ isEdit ? 'Edit Post' : 'New Post' }}</h1>
-      <a mat-button routerLink="/posts"><mat-icon>arrow_back</mat-icon> Back</a>
+      <a mat-button routerLink="/admin/posts"><mat-icon>arrow_back</mat-icon> Back</a>
     </div>
     <div class="card">
       <form [formGroup]="form" (ngSubmit)="submit()">
@@ -58,8 +58,9 @@ import { MediaResponse } from '../../../core/models/media.model';
             <textarea matInput formControlName="description" rows="6"></textarea>
           </mat-form-field>
           <div>
-            <label style="font-size:13px;color:#757575;display:block;margin-bottom:8px">Cover Image</label>
+            <label style="font-size:13px;color:#757575;display:block;margin-bottom:8px">Cover Image *</label>
             <app-media-picker [value]="coverMedia" category="general" (valueChange)="coverMedia = $event"></app-media-picker>
+            <div *ngIf="showCoverError" style="color:#c62828;font-size:12px;margin-top:4px">Cover image is required</div>
           </div>
         </div>
         <div style="display:flex;gap:12px;margin-top:24px">
@@ -67,7 +68,7 @@ import { MediaResponse } from '../../../core/models/media.model';
             <mat-spinner *ngIf="saving" diameter="20"></mat-spinner>
             <span *ngIf="!saving">{{ isEdit ? 'Update' : 'Create' }}</span>
           </button>
-          <a mat-button routerLink="/posts">Cancel</a>
+          <a mat-button routerLink="/admin/posts">Cancel</a>
         </div>
       </form>
     </div>
@@ -92,6 +93,7 @@ export class PostFormComponent implements OnInit {
   coverMedia: MediaResponse | null = null;
   isEdit = false;
   saving = false;
+  showCoverError = false;
   private editId: number | null = null;
 
   ngOnInit() {
@@ -112,11 +114,19 @@ export class PostFormComponent implements OnInit {
 
   submit() {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
+    
+    // Validate cover image
+    if (!this.coverMedia) {
+      this.showCoverError = true;
+      return;
+    }
+    this.showCoverError = false;
+    
     this.saving = true;
     const req = { ...this.form.value, coverMediaId: this.coverMedia?.id } as any;
     const obs = this.isEdit ? this.svc.updatePost(this.editId!, req) : this.svc.createPost(req);
     obs.subscribe({
-      next: () => { this.snack.open(this.isEdit ? 'Updated!' : 'Created!', '', { duration: 2000 }); this.router.navigate(['/posts']); },
+      next: () => { this.snack.open(this.isEdit ? 'Updated!' : 'Created!', '', { duration: 2000 }); this.router.navigate(['/admin/posts']); },
       error: err => { this.saving = false; this.snack.open(err.error?.message || 'Error', '', { duration: 3000 }); }
     });
   }

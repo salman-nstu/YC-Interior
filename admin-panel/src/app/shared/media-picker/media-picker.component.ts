@@ -19,76 +19,26 @@ import { environment } from '../../environments/environment';
   standalone: true,
   imports: [
     CommonModule, FormsModule, MatDialogModule, MatButtonModule, MatIconModule,
-    MatFormFieldModule, MatInputModule, MatSelectModule, MatProgressSpinnerModule, MatTabsModule
+    MatFormFieldModule, MatInputModule, MatSelectModule, MatProgressSpinnerModule
   ],
   template: `
-    <h2 mat-dialog-title>Select Media</h2>
+    <h2 mat-dialog-title>Upload Media</h2>
     <mat-dialog-content>
-      <mat-tab-group>
-        <!-- Upload Tab -->
-        <mat-tab label="Upload New">
-          <div class="upload-tab">
-            <div class="upload-zone" (click)="fileInput.click()" (dragover)="$event.preventDefault()" (drop)="onDrop($event)">
-              <mat-icon>cloud_upload</mat-icon>
-              <p>Click or drag & drop to upload</p>
-              <small>Max 10MB — Images, PDF</small>
-            </div>
-            <input #fileInput type="file" hidden accept="image/*,application/pdf" (change)="onFileSelected($event)">
-            <div *ngIf="uploading" class="upload-progress">
-              <mat-spinner diameter="32"></mat-spinner>
-              <span>Uploading...</span>
-            </div>
-          </div>
-        </mat-tab>
-
-        <!-- Library Tab -->
-        <mat-tab label="Media Library">
-          <div class="library-filters">
-            <mat-form-field appearance="outline" class="filter-field">
-              <mat-label>Category</mat-label>
-              <mat-select [(ngModel)]="filterCategory" (ngModelChange)="loadMedia()">
-                <mat-option value="">All</mat-option>
-                <mat-option *ngFor="let c of categories" [value]="c">{{ c }}</mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
-
-          <div *ngIf="loading" class="loading-center">
-            <mat-spinner diameter="40"></mat-spinner>
-          </div>
-
-          <div class="media-grid" *ngIf="!loading">
-            <div *ngFor="let m of mediaList"
-                 class="media-item"
-                 [class.selected]="selected?.id === m.id"
-                 (click)="select(m)">
-              <img *ngIf="isImage(m)" [src]="m.url" [alt]="m.altText || m.fileName">
-              <div *ngIf="!isImage(m)" class="file-icon">
-                <mat-icon>insert_drive_file</mat-icon>
-                <span>{{ m.fileName }}</span>
-              </div>
-              <div class="check" *ngIf="selected?.id === m.id">
-                <mat-icon>check_circle</mat-icon>
-              </div>
-            </div>
-          </div>
-
-          <div *ngIf="!loading && mediaList.length === 0" class="empty">
-            <mat-icon>photo_library</mat-icon>
-            <p>No media found</p>
-          </div>
-
-          <div class="pagination" *ngIf="totalPages > 1">
-            <button mat-button [disabled]="currentPage === 0" (click)="changePage(currentPage - 1)">Prev</button>
-            <span>{{ currentPage + 1 }} / {{ totalPages }}</span>
-            <button mat-button [disabled]="currentPage >= totalPages - 1" (click)="changePage(currentPage + 1)">Next</button>
-          </div>
-        </mat-tab>
-      </mat-tab-group>
+      <div class="upload-tab">
+        <div class="upload-zone" (click)="fileInput.click()" (dragover)="$event.preventDefault()" (drop)="onDrop($event)">
+          <mat-icon>cloud_upload</mat-icon>
+          <p>Click or drag & drop to upload</p>
+          <small>Max 10MB — Images, PDF</small>
+        </div>
+        <input #fileInput type="file" hidden accept="image/*,application/pdf" (change)="onFileSelected($event)">
+        <div *ngIf="uploading" class="upload-progress">
+          <mat-spinner diameter="32"></mat-spinner>
+          <span>Uploading...</span>
+        </div>
+      </div>
     </mat-dialog-content>
     <mat-dialog-actions align="end">
       <button mat-button mat-dialog-close>Cancel</button>
-      <button mat-flat-button color="primary" [disabled]="!selected" (click)="confirm()">Select</button>
     </mat-dialog-actions>
   `,
   styles: [`
@@ -103,25 +53,6 @@ import { environment } from '../../environments/environment';
       &:hover { border-color: #388e3c; background: #f1f8e9; }
     }
     .upload-progress { display: flex; align-items: center; gap: 12px; margin-top: 16px; justify-content: center; }
-    .library-filters { padding: 12px 0; }
-    .filter-field { width: 200px; }
-    .loading-center { display: flex; justify-content: center; padding: 40px; }
-    .media-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-      gap: 8px; padding: 8px 0;
-    }
-    .media-item {
-      position: relative; border-radius: 8px; overflow: hidden;
-      border: 2px solid transparent; cursor: pointer; aspect-ratio: 1;
-      background: #f5f5f5;
-      img { width: 100%; height: 100%; object-fit: cover; }
-      &:hover { border-color: #81c784; }
-      &.selected { border-color: #388e3c; }
-    }
-    .file-icon { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 4px; padding: 8px; mat-icon { color: #757575; } span { font-size: 10px; text-align: center; word-break: break-all; } }
-    .check { position: absolute; top: 4px; right: 4px; color: #388e3c; mat-icon { font-size: 20px; width: 20px; height: 20px; } }
-    .empty { display: flex; flex-direction: column; align-items: center; padding: 40px; color: #9e9e9e; mat-icon { font-size: 48px; width: 48px; height: 48px; } }
-    .pagination { display: flex; align-items: center; justify-content: center; gap: 16px; padding: 8px 0; }
   `]
 })
 export class MediaPickerDialogComponent implements OnInit {
@@ -129,28 +60,9 @@ export class MediaPickerDialogComponent implements OnInit {
   private dialogRef = inject(MatDialogRef<MediaPickerDialogComponent>);
   data = inject(MAT_DIALOG_DATA);
 
-  mediaList: MediaResponse[] = [];
-  selected: MediaResponse | null = null;
-  loading = false;
   uploading = false;
-  filterCategory = '';
-  currentPage = 0;
-  totalPages = 1;
-  categories = ['general', 'project', 'service', 'gallery', 'team', 'client', 'review', 'about', 'settings'];
 
-  ngOnInit() { this.loadMedia(); }
-
-  loadMedia() {
-    this.loading = true;
-    this.mediaService.getAll(this.filterCategory || undefined, undefined, this.currentPage, 20).subscribe({
-      next: res => {
-        this.mediaList = res.data?.content || [];
-        this.totalPages = res.data?.totalPages || 1;
-        this.loading = false;
-      },
-      error: () => { this.loading = false; }
-    });
-  }
+  ngOnInit() { }
 
   onFileSelected(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0];
@@ -169,17 +81,13 @@ export class MediaPickerDialogComponent implements OnInit {
     this.mediaService.upload(file, cat).subscribe({
       next: res => {
         this.uploading = false;
-        this.selected = res.data;
         this.dialogRef.close(res.data);
       },
-      error: () => { this.uploading = false; }
+      error: () => { 
+        this.uploading = false; 
+      }
     });
   }
-
-  select(m: MediaResponse) { this.selected = m; }
-  confirm() { this.dialogRef.close(this.selected); }
-  isImage(m: MediaResponse) { return m.mimeType?.startsWith('image/'); }
-  changePage(p: number) { this.currentPage = p; this.loadMedia(); }
 }
 
 // ─── Inline Upload Component ──────────────────────────────────────────────────

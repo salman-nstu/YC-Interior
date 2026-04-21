@@ -195,7 +195,7 @@ export class ProjectsListComponent implements OnInit {
   onActionClick(event: { action: string; item: ProjectResponse }) {
     switch (event.action) {
       case 'edit':
-        window.location.href = `/projects/${event.item.id}/edit`;
+        window.location.href = `/admin/projects/${event.item.id}/edit`;
         break;
       case 'delete':
         this.deleteItem(event.item);
@@ -226,7 +226,7 @@ export class ProjectsListComponent implements OnInit {
   }
 
   navigateToCreate() {
-    window.location.href = '/projects/new';
+    window.location.href = '/admin/projects/new';
   }
 
   deleteItem(item: ProjectResponse) {
