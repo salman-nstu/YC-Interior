@@ -15,14 +15,17 @@ interface NavItem {
   standalone: true,
   imports: [CommonModule, RouterModule, RouterLinkActive, MatIconModule, MatTooltipModule],
   template: `
+    <!-- Mobile overlay -->
+    <div class="sidebar-overlay" [class.show]="!collapsed" (click)="toggleCollapse.emit()"></div>
+    
     <aside class="sidebar" [class.collapsed]="collapsed">
       <div class="sidebar-header">
-        <div class="logo">
+        <a [routerLink]="'/admin/dashboard'" class="logo" (click)="onLogoClick()">
           <mat-icon>architecture</mat-icon>
           <span *ngIf="!collapsed" class="logo-text">YC Interior</span>
-        </div>
-        <button class="toggle-btn" (click)="toggleCollapse.emit()">
-          <mat-icon>{{ collapsed ? 'chevron_right' : 'chevron_left' }}</mat-icon>
+        </a>
+        <button class="toggle-btn" (click)="toggleCollapse.emit()" [matTooltip]="collapsed ? 'Expand sidebar' : 'Collapse sidebar'" matTooltipPosition="right">
+          <mat-icon>{{ collapsed ? 'keyboard_double_arrow_right' : 'keyboard_double_arrow_left' }}</mat-icon>
         </button>
       </div>
 
@@ -32,7 +35,8 @@ interface NavItem {
            routerLinkActive="active"
            class="nav-item"
            [matTooltip]="collapsed ? item.label : ''"
-           matTooltipPosition="right">
+           matTooltipPosition="right"
+           (click)="onNavClick()">
           <mat-icon>{{ item.icon }}</mat-icon>
           <span *ngIf="!collapsed">{{ item.label }}</span>
         </a>
@@ -46,21 +50,43 @@ interface NavItem {
       background: var(--sidebar-bg);
       color: var(--sidebar-text);
       display: flex; flex-direction: column;
-      transition: width .3s ease, background-color .3s ease;
+      transition: width .3s ease, background-color .3s ease, transform .3s ease;
       z-index: 100;
       overflow: hidden;
       box-shadow: var(--shadow);
     }
-    .sidebar.collapsed { width: var(--sidebar-w-col); }
+    .sidebar.collapsed { 
+      width: var(--sidebar-w-col); 
+      
+      .sidebar-header {
+        justify-content: center;
+        padding: 16px 8px;
+      }
+      
+      .toggle-btn {
+        margin: 0;
+      }
+    }
 
     .sidebar-header {
       display: flex; align-items: center; justify-content: space-between;
       padding: 16px 12px;
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid rgba(255,255,255,.1);
       min-height: var(--navbar-h);
+      gap: 8px;
     }
     .logo {
       display: flex; align-items: center; gap: 10px;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 8px;
+      transition: background-color .2s ease;
+      text-decoration: none;
+      
+      &:hover {
+        background: var(--sidebar-hover);
+      }
+      
       mat-icon { 
         color: var(--matcha-light); 
         font-size: 28px; 
@@ -75,17 +101,33 @@ interface NavItem {
       color: var(--sidebar-text);
     }
     .toggle-btn {
-      background: none; 
-      border: none; 
+      background: var(--sidebar-hover); 
+      border: 1px solid rgba(255,255,255,.1);
       cursor: pointer;
-      color: var(--text-muted); 
-      padding: 4px;
-      border-radius: 4px; 
+      color: var(--sidebar-text); 
+      padding: 6px;
+      border-radius: 6px; 
       display: flex;
-      transition: background-color .2s ease, color .2s ease;
+      align-items: center;
+      justify-content: center;
+      transition: all .2s ease;
+      width: 32px;
+      height: 32px;
+      
+      mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
+      
       &:hover { 
-        background: var(--sidebar-hover); 
-        color: var(--sidebar-text); 
+        background: rgba(255,255,255,.2);
+        border-color: rgba(255,255,255,.2);
+        transform: scale(1.05);
+      }
+      
+      &:active {
+        transform: scale(0.95);
       }
     }
 
@@ -151,6 +193,44 @@ interface NavItem {
     .sidebar-nav::-webkit-scrollbar-thumb:hover {
       background: var(--text-muted);
     }
+    
+    /* Mobile overlay */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 99;
+      opacity: 0;
+      transition: opacity .3s ease;
+      pointer-events: none;
+    }
+    
+    /* Mobile responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+        z-index: 101;
+        width: var(--sidebar-w);
+      }
+      
+      .sidebar:not(.collapsed) {
+        transform: translateX(0);
+      }
+      
+      .sidebar-overlay {
+        display: block;
+      }
+      
+      .sidebar-overlay.show {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      
+      .toggle-btn {
+        display: flex;
+      }
+    }
   `]
 })
 export class SidebarComponent {
@@ -158,19 +238,33 @@ export class SidebarComponent {
   @Output() toggleCollapse = new EventEmitter<void>();
 
   navItems: NavItem[] = [
-    { label: 'Dashboard',        icon: 'dashboard',       route: '/dashboard' },
-    { label: 'Projects',         icon: 'business',        route: '/projects' },
-    { label: 'Services',         icon: 'design_services', route: '/services' },
-    { label: 'Gallery',          icon: 'photo_library',   route: '/gallery' },
-    { label: 'Media',            icon: 'perm_media',      route: '/media' },
-    { label: 'Posts',            icon: 'article',         route: '/posts' },
-    { label: 'Team',             icon: 'group',           route: '/team' },
-    { label: 'Clients',          icon: 'handshake',       route: '/clients' },
-    { label: 'Reviews',          icon: 'star',            route: '/reviews' },
-    { label: 'FAQs',             icon: 'help',            route: '/faqs' },
-    { label: 'About',            icon: 'info',            route: '/about' },
-    { label: 'Statistics',       icon: 'bar_chart',       route: '/statistics' },
-    { label: 'Messages',         icon: 'mail',            route: '/messages' },
-    { label: 'Settings',         icon: 'settings',        route: '/settings' },
+    { label: 'Dashboard',        icon: 'dashboard',       route: '/admin/dashboard' },
+    { label: 'Projects',         icon: 'business',        route: '/admin/projects' },
+    { label: 'Services',         icon: 'design_services', route: '/admin/services' },
+    { label: 'Gallery',          icon: 'photo_library',   route: '/admin/gallery' },
+    { label: 'Media',            icon: 'perm_media',      route: '/admin/media' },
+    { label: 'Posts',            icon: 'article',         route: '/admin/posts' },
+    { label: 'Team',             icon: 'group',           route: '/admin/team' },
+    { label: 'Clients',          icon: 'handshake',       route: '/admin/clients' },
+    { label: 'Reviews',          icon: 'star',            route: '/admin/reviews' },
+    { label: 'FAQs',             icon: 'help',            route: '/admin/faqs' },
+    { label: 'About',            icon: 'info',            route: '/admin/about' },
+    { label: 'Statistics',       icon: 'bar_chart',       route: '/admin/statistics' },
+    { label: 'Messages',         icon: 'mail',            route: '/admin/messages' },
+    { label: 'Settings',         icon: 'settings',        route: '/admin/settings' },
   ];
+  
+  // Close sidebar on mobile when logo is clicked
+  onLogoClick() {
+    if (window.innerWidth <= 768) {
+      this.toggleCollapse.emit();
+    }
+  }
+  
+  // Close sidebar on mobile when nav item is clicked
+  onNavClick() {
+    if (window.innerWidth <= 768) {
+      this.toggleCollapse.emit();
+    }
+  }
 }

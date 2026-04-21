@@ -110,6 +110,40 @@ import { AuthService } from '../../core/services/auth.service';
         background: var(--surface-alt);
       }
     }
+    
+    /* Mobile responsive */
+    @media (max-width: 768px) {
+      .navbar {
+        padding: 0 12px;
+        height: 56px;
+      }
+      
+      .page-title {
+        font-size: 14px;
+        max-width: 150px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      
+      .admin-btn {
+        min-width: unset;
+        padding: 0 8px;
+        
+        span {
+          display: none;
+        }
+        
+        mat-icon:last-child {
+          display: none;
+        }
+      }
+      
+      button[mat-icon-button] {
+        width: 40px;
+        height: 40px;
+      }
+    }
   `]
 })
 export class NavbarComponent {

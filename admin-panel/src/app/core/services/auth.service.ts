@@ -39,7 +39,7 @@ export class AuthService {
     sessionStorage.removeItem(this.ADMIN_KEY);
     this.isLoggedIn.set(false);
     this.currentAdmin.set(null);
-    this.router.navigate(['/login']);
+    this.router.navigate(['/admin/login']);
   }
 
   getToken(): string | null {

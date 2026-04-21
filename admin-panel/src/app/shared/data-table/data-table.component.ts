@@ -56,7 +56,8 @@ export interface FilterOption {
     <div class="page-header">
       <h1>{{ title }}</h1>
       <button mat-flat-button color="primary" (click)="createClick.emit()" *ngIf="showCreateButton">
-        <mat-icon>add</mat-icon> {{ createButtonText }}
+        <mat-icon>add</mat-icon> 
+        <span class="btn-text">{{ createButtonText }}</span>
       </button>
     </div>
 
@@ -64,14 +65,14 @@ export interface FilterOption {
       <!-- Filter Bar -->
       <div class="filter-bar" *ngIf="showFilters">
         <!-- Search -->
-        <mat-form-field appearance="outline" *ngIf="searchable">
+        <mat-form-field appearance="outline" *ngIf="searchable" class="search-field">
           <mat-label>Search</mat-label>
           <input matInput [(ngModel)]="searchTerm" placeholder="Search...">
           <mat-icon matSuffix>search</mat-icon>
         </mat-form-field>
 
         <!-- Additional Filters -->
-        <mat-form-field appearance="outline" *ngFor="let filter of filters" [style.max-width]="filter.type === 'select' ? '160px' : '200px'">
+        <mat-form-field appearance="outline" *ngFor="let filter of filters" class="filter-field">
           <mat-label>{{ filter.label }}</mat-label>
           <mat-select *ngIf="filter.type === 'select'" [(ngModel)]="filterValues[filter.key]" (ngModelChange)="onFilterChange()">
             <mat-option value="">All</mat-option>
@@ -88,72 +89,138 @@ export interface FilterOption {
         <mat-spinner diameter="40"></mat-spinner>
       </div>
 
-      <!-- Data Table -->
-      <table mat-table [dataSource]="items" *ngIf="!loading" class="data-table">
-        <!-- Dynamic Columns -->
-        <ng-container *ngFor="let column of columns" [matColumnDef]="column.key">
-          <th mat-header-cell *matHeaderCellDef [style.width]="column.width">
-            {{ column.label }}
-          </th>
-          <td mat-cell *matCellDef="let row">
-            <!-- Text Column -->
-            <span *ngIf="column.type === 'text' || !column.type">
-              {{ getNestedProperty(row, column.key) }}
-            </span>
+      <!-- Desktop Table View -->
+      <div class="table-wrapper desktop-view" *ngIf="!loading">
+        <table mat-table [dataSource]="items" class="data-table">
+          <!-- Dynamic Columns -->
+          <ng-container *ngFor="let column of columns" [matColumnDef]="column.key">
+            <th mat-header-cell *matHeaderCellDef [style.width]="column.width">
+              {{ column.label }}
+            </th>
+            <td mat-cell *matCellDef="let row">
+              <!-- Text Column -->
+              <span *ngIf="column.type === 'text' || !column.type">
+                {{ getNestedProperty(row, column.key) }}
+              </span>
 
-            <!-- Image Column -->
-            <div *ngIf="column.type === 'image'" class="image-cell">
-              <img *ngIf="getNestedProperty(row, column.imageProperty || column.key)" 
-                   [src]="getNestedProperty(row, column.imageProperty || column.key)" 
-                   class="thumb" 
-                   [alt]="getNestedProperty(row, 'title') || getNestedProperty(row, 'name')">
-              <mat-icon *ngIf="!getNestedProperty(row, column.imageProperty || column.key)" class="icon-placeholder">
-                {{ getDefaultIcon(column.key) }}
-              </mat-icon>
-            </div>
+              <!-- Image Column -->
+              <div *ngIf="column.type === 'image'" class="image-cell">
+                <img *ngIf="getNestedProperty(row, column.imageProperty || column.key)" 
+                     [src]="getNestedProperty(row, column.imageProperty || column.key)" 
+                     class="thumb" 
+                     [alt]="getNestedProperty(row, 'title') || getNestedProperty(row, 'name')">
+                <mat-icon *ngIf="!getNestedProperty(row, column.imageProperty || column.key)" class="icon-placeholder">
+                  {{ getDefaultIcon(column.key) }}
+                </mat-icon>
+              </div>
 
-            <!-- Badge Column -->
-            <span *ngIf="column.type === 'badge'" 
-                  class="badge" 
-                  [ngClass]="getBadgeClass(column, getNestedProperty(row, column.key))">
-              {{ getBadgeLabel(column, getNestedProperty(row, column.key)) }}
-            </span>
+              <!-- Badge Column -->
+              <span *ngIf="column.type === 'badge'" 
+                    class="badge" 
+                    [ngClass]="getBadgeClass(column, getNestedProperty(row, column.key))">
+                {{ getBadgeLabel(column, getNestedProperty(row, column.key)) }}
+              </span>
 
-            <!-- Toggle Column -->
-            <mat-slide-toggle *ngIf="column.type === 'toggle'" 
-                              [checked]="getNestedProperty(row, column.key)"
-                              (change)="onToggleChange(row, column.key, $event.checked)">
-            </mat-slide-toggle>
+              <!-- Toggle Column -->
+              <mat-slide-toggle *ngIf="column.type === 'toggle'" 
+                                [checked]="getNestedProperty(row, column.key)"
+                                (change)="onToggleChange(row, column.key, $event.checked)">
+              </mat-slide-toggle>
 
-            <!-- Date Column -->
-            <span *ngIf="column.type === 'date'">
-              {{ formatDate(getNestedProperty(row, column.key)) }}
-            </span>
+              <!-- Date Column -->
+              <span *ngIf="column.type === 'date'">
+                {{ formatDate(getNestedProperty(row, column.key)) }}
+              </span>
 
-            <!-- Number Column -->
-            <span *ngIf="column.type === 'number'">
-              {{ formatNumber(getNestedProperty(row, column.key)) }}
-            </span>
-          </td>
-        </ng-container>
+              <!-- Number Column -->
+              <span *ngIf="column.type === 'number'">
+                {{ formatNumber(getNestedProperty(row, column.key)) }}
+              </span>
+            </td>
+          </ng-container>
 
-        <!-- Actions Column -->
-        <ng-container matColumnDef="actions" *ngIf="actions.length > 0">
-          <th mat-header-cell *matHeaderCellDef width="120px">Actions</th>
-          <td mat-cell *matCellDef="let row">
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions" *ngIf="actions.length > 0">
+            <th mat-header-cell *matHeaderCellDef width="120px">Actions</th>
+            <td mat-cell *matCellDef="let row">
+              <button *ngFor="let action of actions" 
+                      mat-icon-button 
+                      [color]="action.color || 'primary'"
+                      [matTooltip]="action.tooltip || action.label"
+                      (click)="onActionClick(action.key, row)">
+                <mat-icon>{{ action.icon }}</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+      </div>
+
+      <!-- Mobile Card View -->
+      <div class="mobile-view" *ngIf="!loading">
+        <div class="mobile-card" *ngFor="let item of items">
+          <div class="mobile-card-content">
+            <ng-container *ngFor="let column of columns">
+              <!-- Image Column -->
+              <div *ngIf="column.type === 'image'" class="mobile-image">
+                <img *ngIf="getNestedProperty(item, column.imageProperty || column.key)" 
+                     [src]="getNestedProperty(item, column.imageProperty || column.key)" 
+                     [alt]="getNestedProperty(item, 'title') || getNestedProperty(item, 'name')">
+                <mat-icon *ngIf="!getNestedProperty(item, column.imageProperty || column.key)">
+                  {{ getDefaultIcon(column.key) }}
+                </mat-icon>
+              </div>
+
+              <!-- Other Columns -->
+              <div *ngIf="column.type !== 'image' && column.type !== 'actions'" class="mobile-field">
+                <span class="mobile-label">{{ column.label }}:</span>
+                
+                <!-- Text -->
+                <span *ngIf="column.type === 'text' || !column.type" class="mobile-value">
+                  {{ getNestedProperty(item, column.key) }}
+                </span>
+
+                <!-- Badge -->
+                <span *ngIf="column.type === 'badge'" 
+                      class="badge mobile-value" 
+                      [ngClass]="getBadgeClass(column, getNestedProperty(item, column.key))">
+                  {{ getBadgeLabel(column, getNestedProperty(item, column.key)) }}
+                </span>
+
+                <!-- Toggle -->
+                <mat-slide-toggle *ngIf="column.type === 'toggle'" 
+                                  class="mobile-value"
+                                  [checked]="getNestedProperty(item, column.key)"
+                                  (change)="onToggleChange(item, column.key, $event.checked)">
+                </mat-slide-toggle>
+
+                <!-- Date -->
+                <span *ngIf="column.type === 'date'" class="mobile-value">
+                  {{ formatDate(getNestedProperty(item, column.key)) }}
+                </span>
+
+                <!-- Number -->
+                <span *ngIf="column.type === 'number'" class="mobile-value">
+                  {{ formatNumber(getNestedProperty(item, column.key)) }}
+                </span>
+              </div>
+            </ng-container>
+          </div>
+
+          <!-- Mobile Actions -->
+          <div class="mobile-actions" *ngIf="actions.length > 0">
             <button *ngFor="let action of actions" 
                     mat-icon-button 
                     [color]="action.color || 'primary'"
                     [matTooltip]="action.tooltip || action.label"
-                    (click)="onActionClick(action.key, row)">
+                    (click)="onActionClick(action.key, item)">
               <mat-icon>{{ action.icon }}</mat-icon>
             </button>
-          </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-      </table>
+          </div>
+        </div>
+      </div>
 
       <!-- Empty State -->
       <div *ngIf="!loading && items.length === 0" class="empty-state">
@@ -203,12 +270,26 @@ export interface FilterOption {
       border-bottom: 1px solid var(--border);
       flex-wrap: wrap;
       background: var(--surface);
+      
+      .search-field {
+        flex: 1;
+        min-width: 200px;
+      }
+      
+      .filter-field {
+        max-width: 160px;
+      }
     }
 
     .loading-container {
       display: flex;
       justify-content: center;
       padding: 40px;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
     }
 
     .data-table {
@@ -272,6 +353,79 @@ export interface FilterOption {
       background: var(--surface-alt);
     }
 
+    // Mobile card view (hidden on desktop)
+    .mobile-view {
+      display: none;
+    }
+
+    .mobile-card {
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+
+    .mobile-card-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .mobile-image {
+      width: 60px;
+      height: 60px;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+      
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      
+      mat-icon {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        color: var(--text-disabled);
+      }
+    }
+
+    .mobile-field {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      font-size: 13px;
+    }
+
+    .mobile-label {
+      font-weight: 500;
+      color: var(--text-muted);
+      min-width: 80px;
+    }
+
+    .mobile-value {
+      color: var(--text);
+      flex: 1;
+    }
+
+    .mobile-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
     // Dark mode specific styles
     :host-context(.dark-mode) .badge {
       &.published { background: #1b2e1b; color: #81c784; }
@@ -281,6 +435,100 @@ export interface FilterOption {
       &.inactive { background: #2e1a1a; color: #e57373; }
       &.unread { background: #2e1a1a; color: #e57373; }
       &.read { background: #2a2a2a; color: #a0a0a0; }
+    }
+
+    // Mobile responsive styles
+    @media (max-width: 768px) {
+      .page-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        margin-bottom: 16px;
+        
+        h1 {
+          font-size: 20px;
+        }
+        
+        button {
+          width: 100%;
+          justify-content: center;
+        }
+        
+        .btn-text {
+          display: inline;
+        }
+      }
+
+      .table-container {
+        border-radius: 8px;
+      }
+
+      .filter-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+        padding: 12px;
+        
+        .search-field,
+        .filter-field {
+          width: 100%;
+          max-width: none;
+          min-width: unset;
+        }
+      }
+
+      // Hide desktop table view on mobile
+      .desktop-view {
+        display: none;
+      }
+
+      // Show mobile card view
+      .mobile-view {
+        display: block;
+      }
+
+      .empty-state {
+        padding: 40px 20px;
+        
+        mat-icon {
+          font-size: 48px;
+          width: 48px;
+          height: 48px;
+        }
+        
+        p {
+          font-size: 14px;
+        }
+      }
+    }
+
+    @media (max-width: 480px) {
+      .mobile-card {
+        padding: 12px;
+        flex-direction: column;
+      }
+
+      .mobile-image {
+        width: 100%;
+        height: 120px;
+      }
+
+      .mobile-field {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+      }
+
+      .mobile-label {
+        min-width: unset;
+        font-size: 11px;
+      }
+
+      .mobile-actions {
+        flex-direction: row;
+        justify-content: flex-end;
+        width: 100%;
+      }
     }
   `]
 })
