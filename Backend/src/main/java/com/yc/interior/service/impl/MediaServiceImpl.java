@@ -61,6 +61,14 @@ public class MediaServiceImpl implements MediaService {
     public void delete(Long id) {
         Media media = mediaRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Media", id));
+        
+        // Extract file path from URL and delete physical file
+        if (media.getUrl() != null && media.getUrl().startsWith(baseUrl)) {
+            String filePath = media.getUrl().substring(baseUrl.length() + 1); // +1 for the "/"
+            storageService.delete(filePath);
+        }
+        
+        // Soft delete the media record
         media.setDeletedAt(LocalDateTime.now());
         mediaRepository.save(media);
     }

@@ -62,6 +62,19 @@ public class PostServiceImpl implements PostService {
     @Override
     public void delete(Long id) {
         if (!repository.existsById(id)) throw new ResourceNotFoundException("Post", id);
+        
+        Post entity = repository.findById(id).orElseThrow();
+        
+        // Delete cover media
+        if (entity.getCoverMediaId() != null) {
+            try {
+                mediaService.delete(entity.getCoverMediaId());
+            } catch (Exception e) {
+                System.err.println("Failed to delete cover media: " + e.getMessage());
+            }
+        }
+        
+        // Hard delete the post
         repository.deleteById(id);
     }
 

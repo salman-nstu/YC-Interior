@@ -44,17 +44,43 @@ public class ProjectServiceImpl implements ProjectService {
     @Transactional
     public ProjectResponse create(ProjectRequest request) {
         String slug = resolveSlug(request.getSlug(), request.getTitle());
+        
+        // Auto-assign display order (0-3 for projects, max 4 featured)
+        Integer displayOrder = request.getDisplayOrder();
+        long currentCount = projectRepository.count();
+        
+        if (displayOrder == null) {
+            // Auto-increment: find max and add 1
+            displayOrder = (int) Math.min(currentCount, 3); // Max order is 3 (0-3 = 4 items)
+        } else if (displayOrder >= 0 && displayOrder <= 3) {
+            // If order is in featured range, shift existing items
+            shiftDisplayOrdersForInsertion(displayOrder);
+        } else {
+            // Order is beyond featured range, just use it
+            displayOrder = (int) Math.max(displayOrder, 4);
+        }
+        
         Project entity = Project.builder()
                 .title(request.getTitle()).slug(slug).description(request.getDescription())
                 .coverMediaId(request.getCoverMediaId()).categoryId(request.getCategoryId())
                 .status(parseStatus(request.getStatus()) != null ? parseStatus(request.getStatus()) : Project.ProjectStatus.published)
                 .isFeatured(request.getIsFeatured() != null ? request.getIsFeatured() : false)
-                .displayOrder(request.getDisplayOrder() != null ? request.getDisplayOrder() : 0)
+                .displayOrder(displayOrder)
                 .build();
         if (entity.getStatus() == Project.ProjectStatus.published) entity.setPublishedAt(LocalDateTime.now());
         Project saved = projectRepository.save(entity);
         saveImages(saved.getId(), request.getImageMediaIds());
         return toResponse(saved);
+    }
+    
+    private void shiftDisplayOrdersForInsertion(Integer insertOrder) {
+        // Get all projects with order >= insertOrder and increment their order
+        projectRepository.findAll().stream()
+                .filter(p -> p.getDisplayOrder() != null && p.getDisplayOrder() >= insertOrder)
+                .forEach(p -> {
+                    p.setDisplayOrder(p.getDisplayOrder() + 1);
+                    projectRepository.save(p);
+                });
     }
 
     @Override
@@ -67,8 +93,39 @@ public class ProjectServiceImpl implements ProjectService {
         entity.setCoverMediaId(request.getCoverMediaId());
         entity.setCategoryId(request.getCategoryId());
         Project.ProjectStatus status = parseStatus(request.getStatus());
-        if (status != null) { entity.setStatus(status); if (status == Project.ProjectStatus.published && entity.getPublishedAt() == null) entity.setPublishedAt(LocalDateTime.now()); }
-        if (request.getDisplayOrder() != null) entity.setDisplayOrder(request.getDisplayOrder());
+        if (status != null) { 
+            entity.setStatus(status); 
+            if (status == Project.ProjectStatus.published && entity.getPublishedAt() == null) 
+                entity.setPublishedAt(LocalDateTime.now()); 
+        }
+        
+        // Handle display order changes with shifting
+        if (request.getDisplayOrder() != null) {
+            Integer oldOrder = entity.getDisplayOrder();
+            Integer newOrder = request.getDisplayOrder();
+            
+            if (oldOrder != null && !oldOrder.equals(newOrder)) {
+                if (newOrder < oldOrder) {
+                    // Shift items between newOrder and oldOrder up by 1
+                    projectRepository.findAll().stream()
+                            .filter(p -> p.getDisplayOrder() != null && p.getDisplayOrder() >= newOrder && p.getDisplayOrder() < oldOrder && !p.getId().equals(id))
+                            .forEach(p -> {
+                                p.setDisplayOrder(p.getDisplayOrder() + 1);
+                                projectRepository.save(p);
+                            });
+                } else if (newOrder > oldOrder) {
+                    // Shift items between oldOrder and newOrder down by 1
+                    projectRepository.findAll().stream()
+                            .filter(p -> p.getDisplayOrder() != null && p.getDisplayOrder() > oldOrder && p.getDisplayOrder() <= newOrder && !p.getId().equals(id))
+                            .forEach(p -> {
+                                p.setDisplayOrder(p.getDisplayOrder() - 1);
+                                projectRepository.save(p);
+                            });
+                }
+            }
+            entity.setDisplayOrder(newOrder);
+        }
+        
         projectImageRepository.deleteByProjectId(id);
         saveImages(id, request.getImageMediaIds());
         return toResponse(projectRepository.save(entity));
@@ -78,8 +135,51 @@ public class ProjectServiceImpl implements ProjectService {
     @Transactional
     public void delete(Long id) {
         Project entity = findActive(id);
-        entity.setDeletedAt(LocalDateTime.now());
-        projectRepository.save(entity);
+        Integer deletedOrder = entity.getDisplayOrder();
+        
+        // Get all project images
+        List<ProjectImage> projectImages = projectImageRepository.findByProjectIdOrderByDisplayOrderAsc(id);
+        
+        // Delete all associated media files (cover + gallery images) using MediaService
+        if (entity.getCoverMediaId() != null) {
+            try {
+                mediaService.delete(entity.getCoverMediaId());
+            } catch (Exception e) {
+                // Continue even if media deletion fails
+                System.err.println("Failed to delete cover media: " + e.getMessage());
+            }
+        }
+        
+        // Delete all gallery images
+        for (ProjectImage projectImage : projectImages) {
+            try {
+                mediaService.delete(projectImage.getMediaId());
+            } catch (Exception e) {
+                // Continue even if media deletion fails
+                System.err.println("Failed to delete gallery image: " + e.getMessage());
+            }
+        }
+        
+        // Delete project image records
+        projectImageRepository.deleteByProjectId(id);
+        
+        // Hard delete the project (completely remove from database)
+        projectRepository.deleteById(id);
+        
+        // Reorder remaining projects
+        if (deletedOrder != null) {
+            reorderAfterDeletion(deletedOrder);
+        }
+    }
+    
+    private void reorderAfterDeletion(Integer deletedOrder) {
+        // Get all projects with order > deletedOrder and decrement their order
+        projectRepository.findAll().stream()
+                .filter(p -> p.getDisplayOrder() != null && p.getDisplayOrder() > deletedOrder)
+                .forEach(p -> {
+                    p.setDisplayOrder(p.getDisplayOrder() - 1);
+                    projectRepository.save(p);
+                });
     }
 
     @Override
