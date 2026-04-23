@@ -147,19 +147,13 @@ export interface ContactMessageResponse {
 // ─── About Section ────────────────────────────────────────────────────────────
 export interface AboutSectionResponse {
   id: number;
-  type: string;
-  title: string;
-  content: string;
-  mediaId: number;
+  description: string;
   createdAt: string;
-  media: MediaResponse;
+  updatedAt: string;
 }
 
 export interface AboutSectionRequest {
-  type: string;
-  title?: string;
-  content?: string;
-  mediaId?: number;
+  description: string;
 }
 
 // ─── Statistic ────────────────────────────────────────────────────────────────

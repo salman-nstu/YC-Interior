@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SettingsService } from '../../../shared/services/settings.service';
 import { ApplicationSettings } from '../../../shared/models/settings.model';
@@ -15,11 +15,11 @@ import { environment } from '../../../environments/environment';
           <div class="logo">
             <div class="logo-icon">
               <img 
-                *ngIf="settings?.logoUrl" 
-                [src]="environment.fileBaseUrl + (settings?.logoUrl || '')" 
-                [alt]="settings?.companyName || 'Logo'"
+                *ngIf="settings?.logoMedia?.url" 
+                [src]="settings?.logoMedia?.url" 
+                [alt]="settings?.siteName || 'Logo'"
               />
-              <svg *ngIf="!settings?.logoUrl" width="40" height="40" viewBox="0 0 40 40" fill="none">
+              <svg *ngIf="!settings?.logoMedia?.url" width="40" height="40" viewBox="0 0 40 40" fill="none">
                 <circle cx="20" cy="20" r="19" stroke="currentColor" stroke-width="2"/>
                 <text x="20" y="26" text-anchor="middle" font-size="16" font-weight="600" fill="currentColor">YC</text>
               </svg>
@@ -36,7 +36,7 @@ import { environment } from '../../../environments/environment';
       </nav>
 
       <div class="hero-content">
-        <h1 class="hero-title">{{ settings?.companyName || 'YC INTERIOR & BUILDERS' }}</h1>
+        <h1 class="hero-title">{{ settings?.siteName || 'YC INTERIOR & BUILDERS' }}</h1>
         <p class="hero-subtitle">every space tells a story</p>
         <button class="btn-primary">get free consultation →</button>
       </div>
@@ -178,13 +178,24 @@ export class HeroComponent implements OnInit {
   settings: ApplicationSettings | null = null;
   environment = environment;
 
-  constructor(private settingsService: SettingsService) {}
+  constructor(
+    private settingsService: SettingsService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit() {
+    console.log('Hero component loading settings...');
     this.settingsService.getSettings().subscribe({
       next: (response) => {
+        console.log('Settings API Response:', response);
         if (response.success && response.data) {
           this.settings = response.data;
+          console.log('Settings loaded:', this.settings);
+          console.log('Logo Media:', this.settings.logoMedia);
+          console.log('Logo Media URL:', this.settings.logoMedia?.url);
+          console.log('Has logoMedia?', !!this.settings.logoMedia);
+          console.log('Has logoMedia.url?', !!this.settings.logoMedia?.url);
+          this.cdr.detectChanges();
         }
       },
       error: (error) => {

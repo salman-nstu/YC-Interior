@@ -16,19 +16,8 @@ public class AboutSection {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String title;
-
     @Column(columnDefinition = "TEXT")
     private String description;
-
-    @Column(name = "media_id")
-    private Long mediaId;
-
-    @Column(name = "display_order")
-    private Integer displayOrder = 0;
-
-    @Column(name = "is_active")
-    private Boolean isActive = true;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
