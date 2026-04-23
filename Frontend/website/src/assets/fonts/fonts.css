@@ -1,0 +1,49 @@
+/* Ade Display - For Titles */
+@font-face {
+  font-family: 'Ade Display';
+  font-style: normal;
+  font-weight: 400;
+  src: url('ade-display-regular.woff2') format('woff2');
+  font-display: swap;
+}
+
+/* Sofia Sans - For Body Text */
+@font-face {
+  font-family: 'Sofia Sans';
+  font-style: normal;
+  font-weight: 300;
+  src: url('sofia-sans-300.woff2') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Sofia Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: url('sofia-sans-regular.woff2') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Sofia Sans';
+  font-style: normal;
+  font-weight: 500;
+  src: url('sofia-sans-500.woff2') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Sofia Sans';
+  font-style: normal;
+  font-weight: 600;
+  src: url('sofia-sans-600.woff2') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Sofia Sans';
+  font-style: normal;
+  font-weight: 700;
+  src: url('sofia-sans-700.woff2') format('woff2');
+  font-display: swap;
+}

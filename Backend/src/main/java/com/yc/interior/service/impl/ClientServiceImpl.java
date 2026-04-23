@@ -31,9 +31,30 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public ClientResponse create(ClientRequest request) {
+        // Auto-assign display order
+        Integer displayOrder = request.getDisplayOrder();
+        if (displayOrder == null) {
+            displayOrder = (int) repository.findAll().stream()
+                    .mapToInt(c -> c.getDisplayOrder() != null ? c.getDisplayOrder() : 0)
+                    .max()
+                    .orElse(-1) + 1;
+        } else {
+            // Shift existing items if inserting in the middle
+            shiftDisplayOrdersForInsertion(displayOrder);
+        }
+        
         Client entity = Client.builder().name(request.getName()).logoMediaId(request.getLogoMediaId())
-                .displayOrder(request.getDisplayOrder() != null ? request.getDisplayOrder() : 0).build();
+                .displayOrder(displayOrder).build();
         return toResponse(repository.save(entity));
+    }
+    
+    private void shiftDisplayOrdersForInsertion(Integer insertOrder) {
+        repository.findAll().stream()
+                .filter(c -> c.getDisplayOrder() != null && c.getDisplayOrder() >= insertOrder)
+                .forEach(c -> {
+                    c.setDisplayOrder(c.getDisplayOrder() + 1);
+                    repository.save(c);
+                });
     }
 
     @Override
@@ -41,14 +62,69 @@ public class ClientServiceImpl implements ClientService {
         Client entity = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Client", id));
         entity.setName(request.getName());
         entity.setLogoMediaId(request.getLogoMediaId());
-        if (request.getDisplayOrder() != null) entity.setDisplayOrder(request.getDisplayOrder());
+        
+        // Handle display order changes with shifting
+        if (request.getDisplayOrder() != null) {
+            Integer oldOrder = entity.getDisplayOrder();
+            Integer newOrder = request.getDisplayOrder();
+            
+            if (oldOrder != null && !oldOrder.equals(newOrder)) {
+                if (newOrder < oldOrder) {
+                    // Shift items between newOrder and oldOrder up by 1
+                    repository.findAll().stream()
+                            .filter(c -> c.getDisplayOrder() != null && c.getDisplayOrder() >= newOrder && c.getDisplayOrder() < oldOrder && !c.getId().equals(id))
+                            .forEach(c -> {
+                                c.setDisplayOrder(c.getDisplayOrder() + 1);
+                                repository.save(c);
+                            });
+                } else if (newOrder > oldOrder) {
+                    // Shift items between oldOrder and newOrder down by 1
+                    repository.findAll().stream()
+                            .filter(c -> c.getDisplayOrder() != null && c.getDisplayOrder() > oldOrder && c.getDisplayOrder() <= newOrder && !c.getId().equals(id))
+                            .forEach(c -> {
+                                c.setDisplayOrder(c.getDisplayOrder() - 1);
+                                repository.save(c);
+                            });
+                }
+            }
+            entity.setDisplayOrder(newOrder);
+        }
+        
         return toResponse(repository.save(entity));
     }
 
     @Override
     public void delete(Long id) {
         if (!repository.existsById(id)) throw new ResourceNotFoundException("Client", id);
+        
+        Client entity = repository.findById(id).orElseThrow();
+        Integer deletedOrder = entity.getDisplayOrder();
+        
+        // Delete logo media
+        if (entity.getLogoMediaId() != null) {
+            try {
+                mediaService.delete(entity.getLogoMediaId());
+            } catch (Exception e) {
+                System.err.println("Failed to delete logo media: " + e.getMessage());
+            }
+        }
+        
+        // Hard delete the client
         repository.deleteById(id);
+        
+        // Reorder remaining clients
+        if (deletedOrder != null) {
+            reorderAfterDeletion(deletedOrder);
+        }
+    }
+    
+    private void reorderAfterDeletion(Integer deletedOrder) {
+        repository.findAll().stream()
+                .filter(c -> c.getDisplayOrder() != null && c.getDisplayOrder() > deletedOrder)
+                .forEach(c -> {
+                    c.setDisplayOrder(c.getDisplayOrder() - 1);
+                    repository.save(c);
+                });
     }
 
     private ClientResponse toResponse(Client e) {

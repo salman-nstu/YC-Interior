@@ -53,6 +53,19 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     public void delete(Long id) {
         if (!repository.existsById(id)) throw new ResourceNotFoundException("Review", id);
+        
+        Review entity = repository.findById(id).orElseThrow();
+        
+        // Delete associated media
+        if (entity.getMediaId() != null) {
+            try {
+                mediaService.delete(entity.getMediaId());
+            } catch (Exception e) {
+                System.err.println("Failed to delete media: " + e.getMessage());
+            }
+        }
+        
+        // Hard delete the review
         repository.deleteById(id);
     }
 
