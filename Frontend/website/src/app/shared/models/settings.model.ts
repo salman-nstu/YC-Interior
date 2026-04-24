@@ -6,10 +6,12 @@ export interface ApplicationSettings {
   email: string;
   phone: string;
   address: string;
+  mapEmbedUrl: string | null;
   description: string | null;
   facebookUrl: string | null;
   instagramUrl: string | null;
   linkedinUrl: string | null;
+  whatsappUrl: string | null;
   youtubeUrl: string | null;
   logoMedia?: {
     id: number;

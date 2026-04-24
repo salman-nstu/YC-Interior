@@ -11,7 +11,10 @@ public class ProjectRequest {
     private String slug;
     private String description;
     private Long coverMediaId;
-    private Long categoryId;
+    
+    @NotBlank(message = "Category is required")
+    private String categoryType;
+    
     private String status;
     private Boolean isFeatured;
     private Integer displayOrder;

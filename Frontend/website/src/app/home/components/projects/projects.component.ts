@@ -1,5 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { ProjectService } from '../../../shared/services/project.service';
 import { Project } from '../../../shared/models/project.model';
 import { environment } from '../../../environments/environment';
@@ -15,7 +16,7 @@ import { environment } from '../../../environments/environment';
         
         <div class="projects-grid" *ngIf="displayProjects.length > 0">
           <!-- Show projects when loaded -->
-          <div class="project-card" *ngFor="let project of displayProjects">
+          <div class="project-card" *ngFor="let project of displayProjects" (click)="navigateToProject(project.id)">
             <div class="project-image-wrapper">
               <img 
                 [src]="getProjectImage(project)" 
@@ -36,7 +37,7 @@ import { environment } from '../../../environments/environment';
         </div>
         
         <div class="view-all-wrapper">
-          <button class="btn-view-all">view all →</button>
+          <button class="btn-view-all" (click)="navigateToProjects()">view all →</button>
         </div>
       </div>
     </section>
@@ -68,6 +69,7 @@ import { environment } from '../../../environments/environment';
       height: 190.94px;
       transform: rotate(0.31deg);
       opacity: 1;
+      margin-left: calc((100% - (289px * 4 + 1.5rem * 3)) / 2);
     }
 
     .projects-grid {
@@ -166,6 +168,7 @@ import { environment } from '../../../environments/environment';
       
       .section-title {
         font-size: 4rem;
+        margin-left: calc((100% - (289px * 2 + 1.5rem)) / 2);
       }
     }
 
@@ -182,6 +185,7 @@ import { environment } from '../../../environments/environment';
       .section-title {
         font-size: 3rem;
         margin-bottom: 2rem;
+        margin-left: calc((100% - 289px) / 2);
       }
       
       .container {
@@ -196,7 +200,8 @@ export class ProjectsComponent implements OnInit {
 
   constructor(
     private projectService: ProjectService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -218,6 +223,14 @@ export class ProjectsComponent implements OnInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  navigateToProjects() {
+    this.router.navigate(['/projects']);
+  }
+
+  navigateToProject(projectId: number) {
+    this.router.navigate(['/projects', projectId]);
   }
 
   getProjectImage(project: Project): string {

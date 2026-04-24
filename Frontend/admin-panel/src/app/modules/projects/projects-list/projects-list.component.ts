@@ -6,7 +6,7 @@ import { PageEvent } from '@angular/material/paginator';
 import { Subject, takeUntil, finalize } from 'rxjs';
 import { DataTableComponent, TableColumn, TableAction, FilterOption } from '../../../shared/data-table/data-table.component';
 import { ProjectService } from '../../../core/services/project.service';
-import { ProjectResponse, ProjectCategory } from '../../../core/models/project.model';
+import { ProjectResponse } from '../../../core/models/project.model';
 
 @Component({
   selector: 'app-projects-list',
@@ -42,8 +42,6 @@ export class ProjectsListComponent implements OnInit {
   private cdr = inject(ChangeDetectorRef);
   private destroy$ = new Subject<void>();
 
-  categories: ProjectCategory[] = [];
-
   columns: TableColumn[] = [
     {
       key: 'coverMedia.url',
@@ -58,7 +56,7 @@ export class ProjectsListComponent implements OnInit {
       type: 'text'
     },
     {
-      key: 'category.name',
+      key: 'categoryType',
       label: 'Category',
       type: 'text'
     },
@@ -94,10 +92,13 @@ export class ProjectsListComponent implements OnInit {
       ]
     },
     {
-      key: 'categoryId',
+      key: 'categoryType',
       label: 'Category',
       type: 'select',
-      options: []
+      options: [
+        { value: 'Residential', label: 'Residential' },
+        { value: 'Commercial', label: 'Commercial' }
+      ]
     }
   ];
 
@@ -110,33 +111,12 @@ export class ProjectsListComponent implements OnInit {
   filterValues: any = {};
 
   ngOnInit() {
-    this.loadCategories();
     this.loadData();
   }
 
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
-  }
-
-  private loadCategories() {
-    this.projectService.getCategories().subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.categories = response.data;
-          const categoryFilter = this.filters.find(f => f.key === 'categoryId');
-          if (categoryFilter) {
-            categoryFilter.options = this.categories.map(cat => ({
-              value: cat.id,
-              label: cat.name
-            }));
-          }
-        }
-      },
-      error: (error) => {
-        console.error('Failed to load categories:', error);
-      }
-    });
   }
 
   loadData() {

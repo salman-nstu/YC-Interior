@@ -40,6 +40,7 @@ public class SecurityConfig {
             "/api/gallery/**",
             "/api/statistics/**",
             "/api/impact/**",
+            "/api/team/**",
             "/api/team-members/**",
             "/api/contact-messages/**",
             "/api/settings/**",
@@ -76,10 +77,9 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        // Only allow specific origins in production
-        config.setAllowedOrigins(List.of(
-            "http://localhost:4200", 
-            "http://localhost:4201",
+        // Allow all localhost origins in development
+        config.setAllowedOriginPatterns(List.of(
+            "http://localhost:*",
             "https://admin.yc-interior.com" // Add your production domain
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));

@@ -1,5 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { ServiceService } from '../../../shared/services/service.service';
 import { Service } from '../../../shared/models/service.model';
 import { environment } from '../../../environments/environment';
@@ -14,7 +15,7 @@ import { environment } from '../../../environments/environment';
         <h2 class="section-title">OUR SERVICES</h2>
         
         <div class="services-grid" *ngIf="!loading && services.length > 0">
-          <div class="service-card" *ngFor="let service of services">
+          <div class="service-card" *ngFor="let service of services" (click)="navigateToService(service.id)">
             <div class="service-image">
               <img 
                 [src]="getServiceImage(service)" 
@@ -34,7 +35,7 @@ import { environment } from '../../../environments/environment';
         </div>
         
         <div class="view-all-btn">
-          <button class="btn-primary">view all →</button>
+          <button class="btn-primary" (click)="navigateToServices()">view all →</button>
         </div>
       </div>
     </section>
@@ -249,11 +250,20 @@ export class ServicesComponent implements OnInit {
 
   constructor(
     private serviceService: ServiceService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private router: Router
   ) {}
 
   ngOnInit() {
     this.loadServices();
+  }
+
+  navigateToServices() {
+    this.router.navigate(['/services']);
+  }
+
+  navigateToService(serviceId: number) {
+    this.router.navigate(['/services', serviceId]);
   }
 
   loadServices() {

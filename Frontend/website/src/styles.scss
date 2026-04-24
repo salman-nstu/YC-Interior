@@ -110,7 +110,7 @@ button {
   }
 }
 
-/* Smooth Scrolling */
+/* Smooth Scrolling - Disabled for instant navigation */
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
 }

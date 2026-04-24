@@ -14,4 +14,6 @@ public class SettingsRequest {
     private String facebookUrl;
     private String instagramUrl;
     private String linkedinUrl;
+    private String whatsappUrl;
+    private String youtubeUrl;
 }

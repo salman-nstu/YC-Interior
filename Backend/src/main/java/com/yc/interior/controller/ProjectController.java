@@ -24,11 +24,11 @@ public class ProjectController {
     public ResponseEntity<ApiResponse<PageResponse<ProjectResponse>>> getAll(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String status,
-            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) String categoryType,
             @RequestParam(required = false) Boolean featured,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        return ResponseEntity.ok(ApiResponse.ok(PageResponse.from(service.getAll(keyword, status, categoryId, featured,
+        return ResponseEntity.ok(ApiResponse.ok(PageResponse.from(service.getAll(keyword, status, categoryType, featured,
                 PageRequest.of(page, size, Sort.by("createdAt").descending())))));
     }
 

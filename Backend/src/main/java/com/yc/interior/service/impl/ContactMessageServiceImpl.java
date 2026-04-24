@@ -1,5 +1,6 @@
 package com.yc.interior.service.impl;
 
+import com.yc.interior.dto.request.ContactMessageRequest;
 import com.yc.interior.dto.response.ContactMessageResponse;
 import com.yc.interior.entity.ContactMessage;
 import com.yc.interior.exception.ResourceNotFoundException;
@@ -14,6 +15,19 @@ import org.springframework.stereotype.Service;
 public class ContactMessageServiceImpl implements ContactMessageService {
 
     private final ContactMessageRepository repository;
+
+    @Override
+    public ContactMessageResponse create(ContactMessageRequest request) {
+        ContactMessage entity = ContactMessage.builder()
+                .name(request.getName())
+                .email(request.getEmail())
+                .phone(request.getPhone())
+                .subject(request.getSubject())
+                .message(request.getMessage())
+                .isRead(false)
+                .build();
+        return toResponse(repository.save(entity));
+    }
 
     @Override
     public Page<ContactMessageResponse> getAll(String keyword, Boolean isRead, Pageable pageable) {

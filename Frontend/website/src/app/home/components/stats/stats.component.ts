@@ -13,9 +13,6 @@ gsap.registerPlugin(ScrollTrigger);
   imports: [CommonModule],
   template: `
     <section class="stats-wrapper">
-      <!-- Layer 1: Gradient Strip (Figma Node) -->
-      <div class="bg-strip"></div>
-
       <!-- Layer 2: Loading State -->
       <div class="cards-container loading-state" *ngIf="loading">
         <div class="stat-card skeleton" *ngFor="let i of [1,2,3]">
@@ -29,11 +26,11 @@ gsap.registerPlugin(ScrollTrigger);
         <div class="stat-card card-1" 
              *ngIf="statistics[0]"
              #statCard>
-          <img [src]="getStatImage(statistics[0].icon)" 
+          <img [src]="getStatImage(statistics[0].icon, 0)" 
                [alt]="statistics[0].label"
                class="card-image" />
           <div class="overlay">
-            <h2 class="stat-number" #statNumber>0</h2>
+            <h2 class="stat-number">{{ formatValue(statistics[0].value) }}</h2>
             <p class="stat-label">{{ statistics[0].label }}</p>
           </div>
         </div>
@@ -42,11 +39,11 @@ gsap.registerPlugin(ScrollTrigger);
         <div class="stat-card card-2" 
              *ngIf="statistics[1]"
              #statCard>
-          <img [src]="getStatImage(statistics[1].icon)" 
+          <img [src]="getStatImage(statistics[1].icon, 1)" 
                [alt]="statistics[1].label"
                class="card-image" />
           <div class="overlay">
-            <h2 class="stat-number" #statNumber>0</h2>
+            <h2 class="stat-number">{{ formatValue(statistics[1].value) }}</h2>
             <p class="stat-label">{{ statistics[1].label }}</p>
           </div>
         </div>
@@ -55,11 +52,11 @@ gsap.registerPlugin(ScrollTrigger);
         <div class="stat-card card-3" 
              *ngIf="statistics[2]"
              #statCard>
-          <img [src]="getStatImage(statistics[2].icon)" 
+          <img [src]="getStatImage(statistics[2].icon, 2)" 
                [alt]="statistics[2].label"
                class="card-image" />
           <div class="overlay">
-            <h2 class="stat-number" #statNumber>0</h2>
+            <h2 class="stat-number">{{ formatValue(statistics[2].value) }}</h2>
             <p class="stat-label">{{ statistics[2].label }}</p>
           </div>
         </div>
@@ -75,29 +72,13 @@ gsap.registerPlugin(ScrollTrigger);
     /* WRAPPER - Main container with green background */
     .stats-wrapper {
       position: relative;
-      background: #6f7f6d;
-      padding: 180px 60px 140px;
+      background: #727E6A;
+      padding: 80px 60px 160px;
       overflow: hidden;
       width: 100%;
     }
 
-    /* LAYER 1: Gradient Strip (Figma Node 45:28) */
-    .bg-strip {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 260px;
-      background: linear-gradient(
-        90deg,
-        #cfd0ae 61%,
-        #d9d9d9 100%
-      );
-      box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
-      z-index: 1;
-    }
-
-    /* LAYER 2: Cards Container (Floating Layer) */
+    /* Cards Container */
     .cards-container {
       position: relative;
       z-index: 2;
@@ -112,8 +93,8 @@ gsap.registerPlugin(ScrollTrigger);
     /* LAYER 3: Card Base */
     .stat-card {
       position: relative;
-      width: 280px;
-      height: 420px;
+      width: 380px;
+      height: 520px;
       border-radius: 20px;
       overflow: hidden;
       background: #727E6A;
@@ -131,41 +112,48 @@ gsap.registerPlugin(ScrollTrigger);
     /* Text Overlay */
     .overlay {
       position: absolute;
-      bottom: 30px;
-      left: 25px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       color: #ffffff;
       z-index: 3;
+      text-align: center;
+      width: 100%;
+      padding: 0 20px;
     }
 
     /* Stat Number */
     .stat-number {
-      font-size: 64px;
-      font-weight: 700;
+      font-size: 96px;
+      font-weight: 900;
       margin: 0;
       line-height: 1;
       font-family: 'Sofia Sans', sans-serif;
+      text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
     }
 
     /* Stat Label */
     .stat-label {
-      font-size: 16px;
-      margin: 8px 0 0 0;
-      opacity: 0.9;
+      font-size: 22px;
+      margin: 15px 0 0 0;
+      opacity: 0.95;
       font-family: 'Sofia Sans', sans-serif;
       font-weight: 400;
+      text-transform: lowercase;
+      text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
     }
 
-    /* STAGGERING - Critical for Figma composition */
+    /* STAGGERING - Cascading effect */
     .card-1 {
-      transform: translateY(80px);
+      transform: translateY(-20px);
     }
 
     .card-2 {
-      transform: translateY(0px);
+      transform: translateY(40px);
     }
 
     .card-3 {
-      transform: translateY(120px);
+      transform: translateY(100px);
     }
 
     /* Loading State */
@@ -223,16 +211,16 @@ gsap.registerPlugin(ScrollTrigger);
       }
 
       .stat-card {
-        width: 240px;
-        height: 360px;
+        width: 280px;
+        height: 400px;
       }
 
       .stat-number {
-        font-size: 56px;
+        font-size: 64px;
       }
 
       .stat-label {
-        font-size: 14px;
+        font-size: 16px;
       }
     }
 
@@ -251,8 +239,8 @@ gsap.registerPlugin(ScrollTrigger);
       }
 
       .stat-card {
-        width: 220px;
-        height: 320px;
+        width: 260px;
+        height: 360px;
       }
 
       .card-1,
@@ -262,16 +250,16 @@ gsap.registerPlugin(ScrollTrigger);
       }
 
       .stat-number {
-        font-size: 48px;
+        font-size: 56px;
       }
 
       .stat-label {
-        font-size: 13px;
+        font-size: 15px;
       }
 
       .overlay {
-        bottom: 20px;
-        left: 20px;
+        bottom: 30px;
+        left: 25px;
       }
     }
 
@@ -292,16 +280,16 @@ gsap.registerPlugin(ScrollTrigger);
 
       .stat-card {
         width: 100%;
-        max-width: 300px;
-        height: 280px;
+        max-width: 320px;
+        height: 320px;
       }
 
       .stat-number {
-        font-size: 40px;
+        font-size: 48px;
       }
 
       .stat-label {
-        font-size: 12px;
+        font-size: 14px;
       }
     }
 
@@ -321,20 +309,20 @@ gsap.registerPlugin(ScrollTrigger);
       .stat-card {
         width: 100%;
         max-width: 280px;
-        height: 240px;
+        height: 280px;
       }
 
       .stat-number {
-        font-size: 32px;
+        font-size: 40px;
       }
 
       .stat-label {
-        font-size: 11px;
+        font-size: 13px;
       }
 
       .overlay {
-        bottom: 15px;
-        left: 15px;
+        bottom: 25px;
+        left: 20px;
       }
     }
   `]
@@ -347,12 +335,11 @@ export class StatsComponent implements OnInit, AfterViewInit {
   @ViewChildren('statNumber') statNumbers!: QueryList<ElementRef>;
 
   // Default images for stats (can be overridden by icon field from DB)
-  private defaultImages: { [key: string]: string } = {
-    'running': 'yc-assets/download (37).jpg',
-    'complete': 'yc-assets/download (38).jpg',
-    'success': 'yc-assets/download (39).jpg',
-    'default': 'yc-assets/download1.jpg'
-  };
+  private defaultImages = [
+    '/yc-assets/download13.jpg',  // First stat
+    '/yc-assets/uuu.jpg',          // Second stat
+    '/yc-assets/download12.jpg'    // Third stat
+  ];
 
   constructor(
     private statisticService: StatisticService,
@@ -371,20 +358,16 @@ export class StatsComponent implements OnInit, AfterViewInit {
     this.loading = true;
     this.statisticService.getAll().subscribe({
       next: (response) => {
+        console.log('Statistics API Response:', response);
         if (response.success && response.data) {
-          // Sort by displayOrder
-          this.statistics = response.data.sort((a, b) => 
-            (a.displayOrder || 0) - (b.displayOrder || 0)
-          );
+          // Sort by displayOrder and take first 3
+          this.statistics = response.data
+            .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
+            .slice(0, 3);
+          console.log('Statistics loaded:', this.statistics);
         }
         this.loading = false;
         this.cdr.detectChanges();
-        
-        // Trigger animations after render
-        setTimeout(() => {
-          this.initCardAnimation();
-          this.animateCounters();
-        }, 100);
       },
       error: (error) => {
         console.error('Error loading statistics:', error);
@@ -394,21 +377,27 @@ export class StatsComponent implements OnInit, AfterViewInit {
     });
   }
 
+  formatValue(value: number): string {
+    if (value < 10) {
+      return `0${value}`;
+    }
+    return `${value}`;
+  }
+
   // Dynamic offset calculation (no nth-child hacks)
   getOffset(index: number): number {
     const baseOffset = 40; // Adjust for more/less slope
     return index * baseOffset;
   }
 
-  getStatImage(icon: string): string {
+  getStatImage(icon: string | null, index: number): string {
     // If icon is a full URL, use it
     if (icon && (icon.startsWith('http') || icon.startsWith('/'))) {
       return icon;
     }
     
-    // Otherwise, try to match with default images
-    const key = icon?.toLowerCase() || 'default';
-    return this.defaultImages[key] || this.defaultImages['default'];
+    // Otherwise, use default images by index
+    return this.defaultImages[index] || this.defaultImages[0];
   }
 
   // GSAP Card entrance animation

@@ -1,9 +1,11 @@
 package com.yc.interior.controller;
 
+import com.yc.interior.dto.request.ContactMessageRequest;
 import com.yc.interior.dto.response.*;
 import com.yc.interior.service.ContactMessageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,12 @@ import org.springframework.web.bind.annotation.*;
 public class ContactMessageController {
 
     private final ContactMessageService service;
+
+    @PostMapping
+    @Operation(summary = "Submit a contact message")
+    public ResponseEntity<ApiResponse<ContactMessageResponse>> create(@Valid @RequestBody ContactMessageRequest request) {
+        return ResponseEntity.ok(ApiResponse.ok("Message sent successfully", service.create(request)));
+    }
 
     @GetMapping
     @Operation(summary = "List contact messages")

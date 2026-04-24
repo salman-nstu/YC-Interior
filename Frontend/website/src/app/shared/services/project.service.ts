@@ -16,4 +16,12 @@ export class ProjectService {
   getFeaturedProjects(): Observable<ApiResponse<PageResponse<Project>>> {
     return this.http.get<ApiResponse<PageResponse<Project>>>(`${this.apiUrl}/featured?size=4`);
   }
+
+  getAllProjects(page: number, size: number): Observable<ApiResponse<PageResponse<Project>>> {
+    return this.http.get<ApiResponse<PageResponse<Project>>>(`${this.apiUrl}?page=${page}&size=${size}`);
+  }
+
+  getProjectById(id: number): Observable<ApiResponse<Project>> {
+    return this.http.get<ApiResponse<Project>>(`${this.apiUrl}/${id}`);
+  }
 }

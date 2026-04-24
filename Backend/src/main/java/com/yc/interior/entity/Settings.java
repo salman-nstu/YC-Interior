@@ -43,6 +43,12 @@ public class Settings {
     @Column(name = "linkedin_url")
     private String linkedinUrl;
 
+    @Column(name = "whatsapp_url")
+    private String whatsappUrl;
+
+    @Column(name = "youtube_url")
+    private String youtubeUrl;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 

@@ -1,5 +1,7 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+import { trigger, transition, style, animate } from '@angular/animations';
 import { GalleryService } from '../../../shared/services/gallery.service';
 import { GalleryImage } from '../../../shared/models/gallery.model';
 
@@ -7,6 +9,17 @@ import { GalleryImage } from '../../../shared/models/gallery.model';
   selector: 'app-gallery',
   standalone: true,
   imports: [CommonModule],
+  animations: [
+    trigger('fadeIn', [
+      transition(':enter', [
+        style({ opacity: 0 }),
+        animate('300ms ease-in', style({ opacity: 1 }))
+      ]),
+      transition(':leave', [
+        animate('300ms ease-out', style({ opacity: 0 }))
+      ])
+    ])
+  ],
   template: `
     <section class="gallery-section">
       <!-- Gallery Container -->
@@ -20,12 +33,12 @@ import { GalleryImage } from '../../../shared/models/gallery.model';
 
         <!-- Gallery Grid -->
         <div class="gallery-grid" *ngIf="!loading && images.length > 0">
-          <!-- Image 1: Top Left Large -->
+          <!-- TOP ROW: 3 images above the title box -->
           <div class="gallery-item item-1" 
-               [ngClass]="getAspectRatioClass(images[0])"
                #parallaxItem1
                (mousemove)="onMouseMove($event, parallaxItem1)"
                (mouseleave)="onMouseLeave(parallaxItem1)"
+               (click)="openLightbox(0)"
                *ngIf="images[0]">
             <div class="img-wrapper">
               <img 
@@ -33,17 +46,15 @@ import { GalleryImage } from '../../../shared/models/gallery.model';
                 [alt]="images[0].media?.altText || images[0].title || 'Gallery Image 1'"
                 (load)="onImageLoad($event, images[0])"
                 loading="lazy"
-                decoding="async"
               />
             </div>
           </div>
 
-          <!-- Image 2: Top Center Tall -->
           <div class="gallery-item item-2" 
-               [ngClass]="getAspectRatioClass(images[1])"
                #parallaxItem2
                (mousemove)="onMouseMove($event, parallaxItem2)"
                (mouseleave)="onMouseLeave(parallaxItem2)"
+               (click)="openLightbox(1)"
                *ngIf="images[1]">
             <div class="img-wrapper">
               <img 
@@ -51,17 +62,15 @@ import { GalleryImage } from '../../../shared/models/gallery.model';
                 [alt]="images[1].media?.altText || images[1].title || 'Gallery Image 2'"
                 (load)="onImageLoad($event, images[1])"
                 loading="lazy"
-                decoding="async"
               />
             </div>
           </div>
 
-          <!-- Image 3: Top Right -->
           <div class="gallery-item item-3" 
-               [ngClass]="getAspectRatioClass(images[2])"
                #parallaxItem3
                (mousemove)="onMouseMove($event, parallaxItem3)"
                (mouseleave)="onMouseLeave(parallaxItem3)"
+               (click)="openLightbox(2)"
                *ngIf="images[2]">
             <div class="img-wrapper">
               <img 
@@ -69,17 +78,16 @@ import { GalleryImage } from '../../../shared/models/gallery.model';
                 [alt]="images[2].media?.altText || images[2].title || 'Gallery Image 3'"
                 (load)="onImageLoad($event, images[2])"
                 loading="lazy"
-                decoding="async"
               />
             </div>
           </div>
 
-          <!-- Image 4: Middle Left Small -->
+          <!-- MIDDLE ROW: Left image, Title box, Right image -->
           <div class="gallery-item item-4" 
-               [ngClass]="getAspectRatioClass(images[3])"
                #parallaxItem4
                (mousemove)="onMouseMove($event, parallaxItem4)"
                (mouseleave)="onMouseLeave(parallaxItem4)"
+               (click)="openLightbox(3)"
                *ngIf="images[3]">
             <div class="img-wrapper">
               <img 
@@ -87,61 +95,6 @@ import { GalleryImage } from '../../../shared/models/gallery.model';
                 [alt]="images[3].media?.altText || images[3].title || 'Gallery Image 4'"
                 (load)="onImageLoad($event, images[3])"
                 loading="lazy"
-                decoding="async"
-              />
-            </div>
-          </div>
-
-          <!-- Image 5: Middle Right Large -->
-          <div class="gallery-item item-5" 
-               [ngClass]="getAspectRatioClass(images[4])"
-               #parallaxItem5
-               (mousemove)="onMouseMove($event, parallaxItem5)"
-               (mouseleave)="onMouseLeave(parallaxItem5)"
-               *ngIf="images[4]">
-            <div class="img-wrapper">
-              <img 
-                [src]="getImageUrl(images[4])" 
-                [alt]="images[4].media?.altText || images[4].title || 'Gallery Image 5'"
-                (load)="onImageLoad($event, images[4])"
-                loading="lazy"
-                decoding="async"
-              />
-            </div>
-          </div>
-
-          <!-- Image 6: Bottom Left Large -->
-          <div class="gallery-item item-6" 
-               [ngClass]="getAspectRatioClass(images[5])"
-               #parallaxItem6
-               (mousemove)="onMouseMove($event, parallaxItem6)"
-               (mouseleave)="onMouseLeave(parallaxItem6)"
-               *ngIf="images[5]">
-            <div class="img-wrapper">
-              <img 
-                [src]="getImageUrl(images[5])" 
-                [alt]="images[5].media?.altText || images[5].title || 'Gallery Image 6'"
-                (load)="onImageLoad($event, images[5])"
-                loading="lazy"
-                decoding="async"
-              />
-            </div>
-          </div>
-
-          <!-- Image 7: Bottom Center Tall -->
-          <div class="gallery-item item-7" 
-               [ngClass]="getAspectRatioClass(images[6])"
-               #parallaxItem7
-               (mousemove)="onMouseMove($event, parallaxItem7)"
-               (mouseleave)="onMouseLeave(parallaxItem7)"
-               *ngIf="images[6]">
-            <div class="img-wrapper">
-              <img 
-                [src]="getImageUrl(images[6])" 
-                [alt]="images[6].media?.altText || images[6].title || 'Gallery Image 7'"
-                (load)="onImageLoad($event, images[6])"
-                loading="lazy"
-                decoding="async"
               />
             </div>
           </div>
@@ -151,10 +104,59 @@ import { GalleryImage } from '../../../shared/models/gallery.model';
             <h3>PHOTO<br>GALLERY</h3>
           </div>
 
+          <div class="gallery-item item-5" 
+               #parallaxItem5
+               (mousemove)="onMouseMove($event, parallaxItem5)"
+               (mouseleave)="onMouseLeave(parallaxItem5)"
+               (click)="openLightbox(4)"
+               *ngIf="images[4]">
+            <div class="img-wrapper">
+              <img 
+                [src]="getImageUrl(images[4])" 
+                [alt]="images[4].media?.altText || images[4].title || 'Gallery Image 5'"
+                (load)="onImageLoad($event, images[4])"
+                loading="lazy"
+              />
+            </div>
+          </div>
+
+          <!-- BOTTOM ROW: 2 images on left, CTA box on right -->
+          <div class="gallery-item item-6" 
+               #parallaxItem6
+               (mousemove)="onMouseMove($event, parallaxItem6)"
+               (mouseleave)="onMouseLeave(parallaxItem6)"
+               (click)="openLightbox(5)"
+               *ngIf="images[5]">
+            <div class="img-wrapper">
+              <img 
+                [src]="getImageUrl(images[5])" 
+                [alt]="images[5].media?.altText || images[5].title || 'Gallery Image 6'"
+                (load)="onImageLoad($event, images[5])"
+                loading="lazy"
+              />
+            </div>
+          </div>
+
+          <div class="gallery-item item-7" 
+               #parallaxItem7
+               (mousemove)="onMouseMove($event, parallaxItem7)"
+               (mouseleave)="onMouseLeave(parallaxItem7)"
+               (click)="openLightbox(6)"
+               *ngIf="images[6]">
+            <div class="img-wrapper">
+              <img 
+                [src]="getImageUrl(images[6])" 
+                [alt]="images[6].media?.altText || images[6].title || 'Gallery Image 7'"
+                (load)="onImageLoad($event, images[6])"
+                loading="lazy"
+              />
+            </div>
+          </div>
+
           <!-- Bottom Right Section with Text and Button -->
           <div class="gallery-cta">
             <p class="cta-text">A glimpse into the<br>spaces we've designed<br>and built.</p>
-            <button class="btn-explore-bottom">explore →</button>
+            <button class="btn-explore-bottom" (click)="navigateToGallery()">explore →</button>
           </div>
         </div>
 
@@ -163,20 +165,39 @@ import { GalleryImage } from '../../../shared/models/gallery.model';
           <p>No gallery images available at the moment.</p>
         </div>
       </div>
+
+      <!-- Lightbox Modal -->
+      <div class="lightbox-overlay" 
+           *ngIf="lightboxOpen" 
+           (click)="closeLightbox()"
+           [@fadeIn]>
+        <div class="lightbox-container" (click)="$event.stopPropagation()">
+          <!-- Close Button -->
+          <button class="lightbox-close" (click)="closeLightbox()">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+
+          <!-- Image -->
+          <div class="lightbox-image-wrapper">
+            <img 
+              [src]="getImageUrl(images[currentImageIndex])" 
+              [alt]="images[currentImageIndex]?.media?.altText || images[currentImageIndex]?.title || 'Gallery Image'"
+              class="lightbox-image"
+            />
+          </div>
+        </div>
+      </div>
     </section>
   `,
   styles: [`
     .gallery-section {
       background-color: #D4D9C8;
-      padding: 0;
-      padding-bottom: 0;
+      padding: 60px 0;
       width: 100%;
       min-height: auto;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      margin-bottom: 0;
     }
 
     /* Gallery Container */
@@ -185,14 +206,13 @@ import { GalleryImage } from '../../../shared/models/gallery.model';
       max-width: 100%;
       margin: 0 auto;
       padding: 0 20px;
-      flex: 1;
     }
 
     /* Skeleton Loading */
     .skeleton-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      grid-auto-rows: 180px;
+      grid-template-columns: repeat(6, 1fr);
+      grid-template-rows: repeat(3, 250px);
       gap: 16px;
     }
 
@@ -209,26 +229,16 @@ import { GalleryImage } from '../../../shared/models/gallery.model';
       border-radius: 6px;
     }
 
-    .skeleton:nth-child(1) { grid-column: span 2; grid-row: span 1; }
-    .skeleton:nth-child(2) { grid-column: span 1; grid-row: span 2; }
-    .skeleton:nth-child(3) { grid-column: span 1; grid-row: span 2; }
-    .skeleton:nth-child(4) { grid-column: span 1; grid-row: span 1; }
-    .skeleton:nth-child(5) { grid-column: span 2; grid-row: span 1; }
-    .skeleton:nth-child(6) { grid-column: span 2; grid-row: span 2; }
-    .skeleton:nth-child(7) { grid-column: span 1; grid-row: span 2; }
-    .skeleton-title { grid-column: span 1; grid-row: span 2; }
-    .skeleton-cta { grid-column: span 1; grid-row: span 2; }
-
     @keyframes shimmer {
       0% { background-position: 200% 0; }
       100% { background-position: -200% 0; }
     }
 
-    /* Gallery Grid Layout - Flexible span-based approach */
+    /* Gallery Grid Layout - Matching Prototype */
     .gallery-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      grid-auto-rows: 180px;
+      grid-template-columns: repeat(6, 1fr);
+      grid-template-rows: repeat(3, 250px);
       gap: 16px;
       background-color: #D4D9C8;
       position: relative;
@@ -239,9 +249,10 @@ import { GalleryImage } from '../../../shared/models/gallery.model';
 
     .gallery-item {
       overflow: hidden;
-      border-radius: 0;
+      border-radius: 10px;
       position: relative;
       background: #eaeaea;
+      cursor: pointer;
     }
 
     /* Image wrapper for controlled overflow */
@@ -297,63 +308,48 @@ import { GalleryImage } from '../../../shared/models/gallery.model';
       aspect-ratio: 1 / 1;
     }
 
-    /* Item 1: Top Left Large - spans 2 columns, 1 row */
+    /* TOP ROW: 3 images above title box */
+    /* Item 1: Small left */
     .item-1 {
-      grid-column: span 2;
-      grid-row: span 1;
+      grid-column: 1 / 3;
+      grid-row: 1 / 2;
     }
 
-    /* Item 2: Top Center Tall - spans 1 column, 2 rows */
+    /* Item 2: Large center */
     .item-2 {
-      grid-column: span 1;
-      grid-row: span 2;
+      grid-column: 3 / 5;
+      grid-row: 1 / 2;
     }
 
-    /* Item 3: Top Right - spans 1 column, 2 rows */
+    /* Item 3: Small right */
     .item-3 {
-      grid-column: span 1;
-      grid-row: span 2;
+      grid-column: 5 / 7;
+      grid-row: 1 / 2;
     }
 
-    /* Item 4: Middle Left Small - spans 1 column, 1 row */
+    /* MIDDLE ROW: Left image, Title box, Right image */
+    /* Item 4: Left side (smaller) */
     .item-4 {
-      grid-column: span 1;
-      grid-row: span 1;
+      grid-column: 1 / 3;
+      grid-row: 2 / 3;
     }
 
-    /* Item 5: Middle Right Large - spans 2 columns, 1 row */
-    .item-5 {
-      grid-column: span 2;
-      grid-row: span 1;
-    }
-
-    /* Item 6: Bottom Left Large - spans 2 columns, 2 rows */
-    .item-6 {
-      grid-column: span 2;
-      grid-row: span 2;
-    }
-
-    /* Item 7: Bottom Center Tall - spans 1 column, 2 rows */
-    .item-7 {
-      grid-column: span 1;
-      grid-row: span 2;
-    }
-
-    /* Center Title Box - spans 1 column, 2 rows */
+    /* Center Title Box */
     .gallery-center-title {
-      grid-column: span 1;
-      grid-row: span 2;
+      grid-column: 3 / 5;
+      grid-row: 2 / 3;
       background-color: #1B4332;
       display: flex;
       align-items: center;
       justify-content: center;
       border: 8px solid #FFFFFF;
       box-sizing: border-box;
+      border-radius: 10px;
     }
 
     .gallery-center-title h3 {
       color: #FFFFFF;
-      font-size: 42px;
+      font-size: 48px;
       font-weight: 400;
       line-height: 1.2;
       text-align: center;
@@ -362,10 +358,29 @@ import { GalleryImage } from '../../../shared/models/gallery.model';
       font-family: 'Sofia Sans', sans-serif;
     }
 
-    /* Bottom Right CTA Section - spans 1 column, 2 rows */
+    /* Item 5: Right side (larger) */
+    .item-5 {
+      grid-column: 5 / 7;
+      grid-row: 2 / 3;
+    }
+
+    /* BOTTOM ROW: 2 images on left, CTA box on right */
+    /* Item 6: Bottom left (smaller) */
+    .item-6 {
+      grid-column: 1 / 3;
+      grid-row: 3 / 4;
+    }
+
+    /* Item 7: Bottom center (larger) */
+    .item-7 {
+      grid-column: 3 / 5;
+      grid-row: 3 / 4;
+    }
+
+    /* Bottom Right CTA Section */
     .gallery-cta {
-      grid-column: span 1;
-      grid-row: span 2;
+      grid-column: 5 / 7;
+      grid-row: 3 / 4;
       background-color: #C8D4BA;
       display: flex;
       flex-direction: column;
@@ -373,6 +388,7 @@ import { GalleryImage } from '../../../shared/models/gallery.model';
       justify-content: center;
       padding: 40px 30px;
       text-align: center;
+      border-radius: 10px;
     }
 
     .cta-text {
@@ -420,15 +436,69 @@ import { GalleryImage } from '../../../shared/models/gallery.model';
     }
 
     @media (max-width: 1024px) {
-      .gallery-section {
-        min-height: auto;
-      }
-
       .gallery-grid,
       .skeleton-grid {
-        grid-template-columns: repeat(2, 1fr);
-        grid-auto-rows: 200px;
+        grid-template-columns: repeat(4, 1fr);
+        grid-template-rows: repeat(4, 200px);
         gap: 12px;
+      }
+
+      .item-1 {
+        grid-column: 1 / 3;
+        grid-row: 1 / 2;
+      }
+
+      .item-2 {
+        grid-column: 3 / 5;
+        grid-row: 1 / 2;
+      }
+
+      .item-3 {
+        grid-column: 1 / 3;
+        grid-row: 2 / 3;
+      }
+
+      .item-4 {
+        grid-column: 3 / 5;
+        grid-row: 2 / 3;
+      }
+
+      .gallery-center-title {
+        grid-column: 1 / 3;
+        grid-row: 3 / 4;
+      }
+
+      .item-5 {
+        grid-column: 3 / 5;
+        grid-row: 3 / 4;
+      }
+
+      .item-6 {
+        grid-column: 1 / 3;
+        grid-row: 4 / 5;
+      }
+
+      .item-7 {
+        grid-column: 3 / 5;
+        grid-row: 4 / 5;
+      }
+
+      .gallery-cta {
+        grid-column: 1 / 5;
+        grid-row: 5 / 6;
+      }
+
+      .gallery-center-title h3 {
+        font-size: 36px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .gallery-grid,
+      .skeleton-grid {
+        grid-template-columns: 1fr;
+        grid-auto-rows: 220px;
+        gap: 10px;
       }
 
       .item-1,
@@ -439,36 +509,100 @@ import { GalleryImage } from '../../../shared/models/gallery.model';
       .item-6,
       .item-7,
       .gallery-center-title,
-      .gallery-cta,
-      .skeleton {
-        grid-column: span 1 !important;
-        grid-row: span 1 !important;
-      }
-    }
-
-    @media (max-width: 768px) {
-      .section-title {
-        font-size: 36px;
-      }
-
-      .gallery-grid,
-      .skeleton-grid {
-        grid-template-columns: 1fr;
-        grid-auto-rows: 220px;
-        gap: 10px;
+      .gallery-cta {
+        grid-column: 1 / 2 !important;
+        grid-row: auto !important;
       }
 
       .gallery-center-title h3 {
         font-size: 32px;
       }
+    }
 
-      .gallery-header {
-        margin-top: 40px;
-        margin-bottom: 40px;
+    /* Lightbox Styles */
+    .lightbox-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      background: rgba(212, 217, 200, 0.85);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      overflow: hidden;
+    }
+
+    .lightbox-container {
+      position: relative;
+      width: 100%;
+      max-width: 1400px;
+      height: 90vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .lightbox-image-wrapper {
+      position: relative;
+      max-width: 100%;
+      max-height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .lightbox-image {
+      max-width: 100%;
+      max-height: 90vh;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(27, 67, 50, 0.9);
+      border: none;
+      color: white;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      z-index: 10001;
+    }
+
+    .lightbox-close:hover {
+      background: rgba(27, 67, 50, 1);
+      transform: rotate(90deg) scale(1.1);
+    }
+
+    @media (max-width: 768px) {
+      .lightbox-overlay {
+        padding: 20px;
       }
 
-      .gallery-title-box {
-        padding: 25px 40px;
+      .lightbox-image {
+        max-height: 80vh;
+      }
+
+      .lightbox-close {
+        top: 10px;
+        right: 10px;
+        width: 45px;
+        height: 45px;
       }
     }
   `]
@@ -477,11 +611,26 @@ export class GalleryComponent implements OnInit {
   images: GalleryImage[] = [];
   loading = false;
   loadedCount = 0;
+  
+  // Lightbox properties
+  lightboxOpen = false;
+  currentImageIndex = 0;
 
   constructor(
     private galleryService: GalleryService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private router: Router
   ) {}
+
+  // Keyboard navigation for lightbox
+  @HostListener('document:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) {
+    if (!this.lightboxOpen) return;
+    
+    if (event.key === 'Escape') {
+      this.closeLightbox();
+    }
+  }
 
   ngOnInit() {
     this.loadGalleryImages();
@@ -643,5 +792,21 @@ export class GalleryComponent implements OnInit {
 
   trackById(index: number, item: GalleryImage): number {
     return item.id;
+  }
+
+  // Lightbox methods
+  openLightbox(index: number): void {
+    this.currentImageIndex = index;
+    this.lightboxOpen = true;
+    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+  }
+
+  closeLightbox(): void {
+    this.lightboxOpen = false;
+    document.body.style.overflow = ''; // Restore scrolling
+  }
+
+  navigateToGallery(): void {
+    this.router.navigate(['/gallery']);
   }
 }

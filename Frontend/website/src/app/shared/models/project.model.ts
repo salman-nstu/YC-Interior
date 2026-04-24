@@ -4,7 +4,7 @@ export interface Project {
   slug?: string;
   description: string;
   coverMediaId?: number;
-  categoryId?: number;
+  categoryType?: string;
   status?: string;
   publishedAt?: string;
   isFeatured?: boolean;
@@ -17,10 +17,6 @@ export interface Project {
     category?: string;
     subCategory?: string;
     altText?: string;
-  };
-  category?: {
-    id: number;
-    name: string;
   };
   images?: Array<{
     id: number;
