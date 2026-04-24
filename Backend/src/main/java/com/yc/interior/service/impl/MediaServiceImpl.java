@@ -30,6 +30,32 @@ public class MediaServiceImpl implements MediaService {
         String subDir = category != null ? category : "general";
         String filePath = storageService.store(file, subDir);
 
+        // Calculate dimensions and aspect ratio
+        Integer width = null;
+        Integer height = null;
+        String aspectRatio = null;
+        
+        try {
+            java.awt.image.BufferedImage img = javax.imageio.ImageIO.read(file.getInputStream());
+            if (img != null) {
+                width = img.getWidth();
+                height = img.getHeight();
+                
+                // Calculate aspect ratio
+                double ratio = (double) width / height;
+                if (ratio > 1.2) {
+                    aspectRatio = "landscape";
+                } else if (ratio < 0.8) {
+                    aspectRatio = "portrait";
+                } else {
+                    aspectRatio = "square";
+                }
+            }
+        } catch (Exception e) {
+            // If image reading fails, continue without dimensions
+            System.err.println("Could not read image dimensions: " + e.getMessage());
+        }
+
         Media media = Media.builder()
                 .url(baseUrl + "/" + filePath)
                 .fileName(file.getOriginalFilename())
@@ -37,6 +63,9 @@ public class MediaServiceImpl implements MediaService {
                 .category(mediaCategory)
                 .subCategory(subCategory)
                 .altText(altText)
+                .width(width)
+                .height(height)
+                .aspectRatio(aspectRatio)
                 .uploadedBy(adminId)
                 .build();
 
@@ -80,14 +109,25 @@ public class MediaServiceImpl implements MediaService {
 
     public MediaResponse toResponse(Media media) {
         if (media == null) return null;
+        
+        // Extract filePath from URL
+        String filePath = null;
+        if (media.getUrl() != null && media.getUrl().startsWith(baseUrl)) {
+            filePath = media.getUrl().substring(baseUrl.length());
+        }
+        
         return MediaResponse.builder()
                 .id(media.getId())
                 .url(media.getUrl())
+                .filePath(filePath)
                 .fileName(media.getFileName())
                 .mimeType(media.getMimeType())
                 .category(media.getCategory() != null ? media.getCategory().name() : null)
                 .subCategory(media.getSubCategory())
                 .altText(media.getAltText())
+                .width(media.getWidth())
+                .height(media.getHeight())
+                .aspectRatio(media.getAspectRatio())
                 .uploadedBy(media.getUploadedBy())
                 .createdAt(media.getCreatedAt())
                 .build();
