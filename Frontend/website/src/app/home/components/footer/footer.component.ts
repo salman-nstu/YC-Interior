@@ -16,13 +16,13 @@ import { environment } from '../../../environments/environment';
           <div class="footer-col">
             <div class="footer-logo">
               <img 
-                *ngIf="settings?.logoUrl" 
-                [src]="environment.fileBaseUrl + (settings?.logoUrl || '')" 
-                [alt]="settings?.companyName || 'Logo'"
+                *ngIf="settings?.logoMedia?.url" 
+                [src]="settings?.logoMedia?.url" 
+                [alt]="settings?.siteName || 'Logo'"
               />
-              <span class="logo-text">{{ settings?.companyName || 'YC Interior' }}</span>
+              <span class="logo-text">{{ settings?.siteName || 'YC Interior' }}</span>
             </div>
-            <h3 class="company-name">{{ settings?.companyName || 'YC Interior & Builders' }}</h3>
+            <h3 class="company-name">{{ settings?.siteName || 'YC Interior & Builders' }}</h3>
             <p class="company-description">
               {{ settings?.description || 'YC Interior Builders is a trusted name in interior design and construction services, dedicated to transforming spaces with creativity, precision, and professionalism.' }}
             </p>

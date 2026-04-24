@@ -13,8 +13,14 @@ import { MiscService } from '../../core/services/misc.service';
 import { AboutSectionResponse } from '../../core/models/misc.model';
 import { MediaPickerComponent } from '../../shared/media-picker/media-picker.component';
 import { MediaResponse } from '../../core/models/media.model';
+import { finalize } from 'rxjs/operators';
 
-const SECTION_TYPES = ['about', 'why_choose_us', 'chairman_message', 'company_overview'];
+const SECTION_TYPES = [
+  { id: 1, key: 'about', title: 'About' },
+  { id: 2, key: 'why_choose_us', title: 'Why Choose Us' },
+  { id: 3, key: 'chairman_message', title: 'Chairman Message' },
+  { id: 4, key: 'company_overview', title: 'Company Overview' }
+];
 
 @Component({
   selector: 'app-about',
@@ -32,19 +38,19 @@ const SECTION_TYPES = ['about', 'why_choose_us', 'chairman_message', 'company_ov
     <div *ngIf="loading" style="display:flex;justify-content:center;padding:40px"><mat-spinner diameter="40"></mat-spinner></div>
 
     <mat-tab-group *ngIf="!loading">
-      <mat-tab *ngFor="let type of sectionTypes" [label]="formatType(type)">
+      <mat-tab *ngFor="let type of sectionTypes" [label]="type.title">
         <div class="card" style="margin-top:16px">
-          <form [formGroup]="getForms(type)" (ngSubmit)="save(type)">
+          <form [formGroup]="getForms(type.key)" (ngSubmit)="save(type.key)">
             <div class="form-grid">
               <mat-form-field appearance="outline" class="form-full">
                 <mat-label>Content</mat-label>
-                <textarea matInput [formControl]="getForms(type).controls['content']" rows="8"></textarea>
+                <textarea matInput [formControl]="getForms(type.key).controls['content']" rows="8"></textarea>
               </mat-form-field>
             </div>
             <div style="margin-top:16px">
-              <button mat-flat-button color="primary" type="submit" [disabled]="saving[type]">
-                <mat-spinner *ngIf="saving[type]" diameter="20"></mat-spinner>
-                <span *ngIf="!saving[type]">Save</span>
+              <button mat-flat-button color="primary" type="submit" [disabled]="saving[type.key]">
+                <mat-spinner *ngIf="saving[type.key]" diameter="20"></mat-spinner>
+                <span *ngIf="!saving[type.key]">Save</span>
               </button>
             </div>
           </form>
@@ -62,69 +68,83 @@ export class AboutComponent implements OnInit {
 
   sectionTypes = SECTION_TYPES;
   sections: Record<string, AboutSectionResponse | null> = {};
-  mediaMap: Record<string, MediaResponse | null> = {};
   forms: Record<string, any> = {};
   saving: Record<string, boolean> = {};
   loading = false;
 
   ngOnInit() {
     SECTION_TYPES.forEach(t => {
-      this.forms[t] = this.fb.group({ content: [''] });
-      this.saving[t] = false;
-      this.sections[t] = null;
-      this.mediaMap[t] = null;
+      this.forms[t.key] = this.fb.group({ content: [''] });
+      this.saving[t.key] = false;
+      this.sections[t.key] = null;
     });
     this.load();
   }
 
   load() {
-    this.zone.run(() => {
-      this.loading = true;
-      this.cdr.markForCheck();
-    });
+    this.loading = true;
+    this.cdr.detectChanges();
     
-    this.svc.getAboutSections().subscribe({
+    this.svc.getAboutSections().pipe(
+      finalize(() => {
+        this.loading = false;
+        this.cdr.detectChanges();
+      })
+    ).subscribe({
       next: r => {
-        this.zone.run(() => {
-          (r.data?.content || []).forEach(s => {
-            this.sections[s.type] = s;
-            this.forms[s.type]?.patchValue({ content: s.content });
-            this.mediaMap[s.type] = s.media || null;
-          });
-          this.loading = false;
-          this.cdr.markForCheck();
+        console.log('About sections loaded:', r);
+        const items = r.data?.content || [];
+        // Map items by ID to section types
+        SECTION_TYPES.forEach(type => {
+          const item = items.find(s => s.id === type.id);
+          if (item) {
+            this.sections[type.key] = item;
+            this.forms[type.key]?.patchValue({ content: item.description || '' });
+          }
         });
       },
-      error: () => {
-        this.zone.run(() => {
-          this.loading = false;
-          this.cdr.markForCheck();
-        });
+      error: (err) => {
+        console.error('Error loading about sections:', err);
+        this.snack.open('Error loading data. Check console for details.', '', { duration: 5000 });
       }
     });
   }
 
   getForms(type: string) { return this.forms[type]; }
-  getMedia(type: string): MediaResponse | null { return this.mediaMap[type]; }
-  setMedia(type: string, m: MediaResponse | null) { this.mediaMap[type] = m; }
 
-  save(type: string) {
-    this.saving[type] = true;
-    const val = this.forms[type].value;
-    const req = { type, content: val.content };
-    const existing = this.sections[type];
-    const obs = existing
-      ? this.svc.updateAboutSection(existing.id, req)
-      : this.svc.createAboutSection(req);
-    obs.subscribe({
+  save(typeKey: string) {
+    const typeConfig = SECTION_TYPES.find(t => t.key === typeKey);
+    if (!typeConfig) return;
+    
+    const val = this.forms[typeKey].value;
+    
+    // Only send description field
+    const req = { 
+      description: val.content
+    };
+    
+    console.log('Saving about section:', typeConfig.id, req);
+    
+    // Always update using the fixed ID
+    this.saving[typeKey] = true;
+    this.cdr.detectChanges();
+    
+    this.svc.updateAboutSection(typeConfig.id, req).pipe(
+      finalize(() => {
+        this.saving[typeKey] = false;
+        this.cdr.detectChanges();
+      })
+    ).subscribe({
       next: res => {
-        this.sections[type] = res.data;
-        this.saving[type] = false;
+        console.log('Save response:', res);
+        this.sections[typeKey] = res.data;
         this.snack.open('Saved!', '', { duration: 2000 });
       },
-      error: err => { this.saving[type] = false; this.snack.open(err.error?.message || 'Error', '', { duration: 3000 }); }
+      error: err => {
+        console.error('Save error:', err);
+        this.snack.open(err.error?.message || 'Error saving. Check console for details.', '', { duration: 5000 });
+      }
     });
   }
-
-  formatType(t: string) { return t.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()); }
 }
+

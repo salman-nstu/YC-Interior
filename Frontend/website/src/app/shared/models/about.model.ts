@@ -1,8 +1,6 @@
-export interface AboutUs {
+export interface AboutSection {
   id: number;
-  title: string;
-  content: string;
-  imageUrl: string | null;
+  description: string;
   createdAt: string;
   updatedAt: string;
 }

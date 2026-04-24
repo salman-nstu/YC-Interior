@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { ApiResponse } from '../models/api.model';
-import { AboutUs } from '../models/about.model';
+import { ApiResponse, PageResponse } from '../models/api.model';
+import { AboutSection } from '../models/about.model';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +13,11 @@ export class AboutService {
 
   constructor(private http: HttpClient) {}
 
-  getAbout(): Observable<ApiResponse<AboutUs>> {
-    return this.http.get<ApiResponse<AboutUs>>(this.apiUrl);
+  getAboutSections(page: number = 0, size: number = 10): Observable<ApiResponse<PageResponse<AboutSection>>> {
+    return this.http.get<ApiResponse<PageResponse<AboutSection>>>(`${this.apiUrl}?page=${page}&size=${size}`);
+  }
+
+  getAboutById(id: number): Observable<ApiResponse<AboutSection>> {
+    return this.http.get<ApiResponse<AboutSection>>(`${this.apiUrl}/${id}`);
   }
 }
