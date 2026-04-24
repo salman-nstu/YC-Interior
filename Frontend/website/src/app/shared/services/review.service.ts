@@ -13,7 +13,8 @@ export class ReviewService {
 
   constructor(private http: HttpClient) {}
 
-  getAllReviews(): Observable<ApiResponse<Review[]>> {
-    return this.http.get<ApiResponse<Review[]>>(this.apiUrl);
+  getAllReviews(): Observable<ApiResponse<any>> {
+    // Get all featured reviews with a large page size
+    return this.http.get<ApiResponse<any>>(`${this.apiUrl}?featured=true&page=0&size=100`);
   }
 }

@@ -1,9 +1,16 @@
 export interface Review {
   id: number;
-  clientName: string;
+  name: string;
+  designation: string;
   rating: number;
-  comment: string;
-  projectTitle: string | null;
-  displayOrder: number;
+  description: string;
+  mediaId: number | null;
+  isFeatured: boolean;
   createdAt: string;
+  updatedAt: string;
+  media?: {
+    id: number;
+    url: string;
+    fileName: string;
+  };
 }

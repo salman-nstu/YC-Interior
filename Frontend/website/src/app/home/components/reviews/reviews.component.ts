@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReviewService } from '../../../shared/services/review.service';
 import { Review } from '../../../shared/models/review.model';
+import { gsap } from 'gsap';
 
 @Component({
   selector: 'app-reviews',
@@ -9,181 +10,427 @@ import { Review } from '../../../shared/models/review.model';
   imports: [CommonModule],
   template: `
     <section class="reviews-section">
-      <div class="container">
-        <div class="quote-icon">
-          <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
-            <path d="M20 50V30C20 20 25 15 35 15H40V25H35C30 25 28 27 28 32V35H40V50H20ZM50 50V30C50 20 55 15 65 15H70V25H65C60 25 58 27 58 32V35H70V50H50Z" fill="currentColor"/>
-          </svg>
+      <!-- Quote Icon -->
+      <div class="quote-icon">
+        <svg width="80" height="60" viewBox="0 0 80 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M15 37.5V22.5C15 15 18.75 11.25 26.25 11.25H30V18.75H26.25C22.5 18.75 21 20.25 21 24V26.25H30V37.5H15ZM37.5 37.5V22.5C37.5 15 41.25 11.25 48.75 11.25H52.5V18.75H48.75C45 18.75 43.5 20.25 43.5 24V26.25H52.5V37.5H37.5Z" 
+                fill="#95A99C" opacity="0.5"/>
+        </svg>
+      </div>
+      
+      <!-- Subtitle -->
+      <p class="reviews-subtitle">what our customers are saying</p>
+      
+      <!-- Carousel Dots -->
+      <div class="carousel-dots" *ngIf="reviews.length > 0">
+        <span class="dot" 
+              *ngFor="let review of reviews; let i = index" 
+              [class.active]="i === 0"></span>
+      </div>
+      
+      <!-- Reviews Carousel -->
+      <div class="reviews-carousel-wrapper">
+        <!-- Loading State -->
+        <div class="carousel-track loading-track" *ngIf="loading">
+          <div class="review-card skeleton">
+            <div class="skeleton-shimmer"></div>
+          </div>
+          <div class="review-card skeleton">
+            <div class="skeleton-shimmer"></div>
+          </div>
+          <div class="review-card skeleton">
+            <div class="skeleton-shimmer"></div>
+          </div>
         </div>
         
-        <p class="reviews-subtitle">what our customers are saying</p>
-        
-        <div class="reviews-carousel" *ngIf="reviews.length > 0">
-          <div class="carousel-track">
-            <div class="review-card" *ngFor="let review of displayReviews">
-              <div class="review-header">
-                <div class="reviewer-icon">
-                  <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                    <circle cx="20" cy="20" r="20" fill="currentColor" opacity="0.2"/>
-                    <path d="M20 20C23.3137 20 26 17.3137 26 14C26 10.6863 23.3137 8 20 8C16.6863 8 14 10.6863 14 14C14 17.3137 16.6863 20 20 20ZM20 22C15.5817 22 8 24.2183 8 28.6667V32H32V28.6667C32 24.2183 24.4183 22 20 22Z" fill="currentColor"/>
-                  </svg>
-                </div>
-                <div class="reviewer-info">
-                  <h4 class="reviewer-name">{{ review.clientName }}</h4>
-                  <div class="rating">
-                    <span *ngFor="let star of getStars(review.rating)">★</span>
-                  </div>
+        <!-- Review Cards -->
+        <div class="carousel-track" 
+             #track
+             *ngIf="!loading && displayReviews.length > 0">
+          <div class="review-card" 
+               *ngFor="let review of displayReviews; trackBy: trackById">
+            <!-- Header -->
+            <div class="review-header">
+              <div class="avatar"></div>
+              
+              <div class="review-meta">
+                <h4>{{ review.name }}</h4>
+                <div class="stars" *ngIf="review.rating">
+                  <span *ngFor="let star of getStars(review.rating)">★</span>
                 </div>
               </div>
-              <p class="review-text">{{ review.comment }}</p>
+            </div>
+            
+            <!-- Divider -->
+            <div class="divider"></div>
+            
+            <!-- Content Box -->
+            <div class="review-body">
+              {{ review.description || 'Sample review content here...' }}
             </div>
           </div>
         </div>
         
-        <div class="carousel-dots" *ngIf="reviews.length > 0">
-          <span class="dot" *ngFor="let review of reviews; let i = index" [class.active]="i === 0"></span>
-        </div>
-        
-        <div class="empty-state" *ngIf="reviews.length === 0 && !loading">
+        <!-- Empty State -->
+        <div class="empty-state" *ngIf="!loading && reviews.length === 0">
           <p>No reviews available at the moment.</p>
         </div>
       </div>
     </section>
   `,
   styles: [`
+    /* SECTION BG */
     .reviews-section {
-      padding: var(--spacing-xl) 0;
-      background-color: var(--color-cream);
-      text-align: center;
+      background: #E8E4D9;
+      padding: 100px 0;
+      overflow: hidden;
     }
 
+    /* Quote Icon */
     .quote-icon {
-      color: var(--color-primary-dark);
-      margin-bottom: 1rem;
-      
-      svg {
-        opacity: 0.3;
-      }
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
     }
 
+    /* Subtitle */
     .reviews-subtitle {
-      font-size: 0.9rem;
-      color: var(--color-text-light);
-      margin-bottom: 3rem;
+      font-family: 'Sofia Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 400;
+      color: #5a5a5a;
+      text-align: center;
+      margin: 0 0 30px 0;
       text-transform: lowercase;
     }
 
-    .reviews-carousel {
-      overflow: hidden;
-      margin-bottom: 2rem;
-    }
-
-    .carousel-track {
-      display: flex;
-      gap: 2rem;
-      animation: scrollReviews 40s linear infinite;
-      
-      &:hover {
-        animation-play-state: paused;
-      }
-    }
-
-    .review-card {
-      flex-shrink: 0;
-      width: 400px;
-      background: rgba(149, 169, 156, 0.2);
-      border-radius: var(--radius-lg);
-      padding: 2rem;
-      text-align: left;
-      
-      .review-header {
-        display: flex;
-        gap: 1rem;
-        margin-bottom: 1.5rem;
-        
-        .reviewer-icon {
-          color: var(--color-primary-dark);
-        }
-        
-        .reviewer-info {
-          .reviewer-name {
-            font-size: 1.1rem;
-            margin-bottom: 0.25rem;
-            color: var(--color-text-dark);
-          }
-          
-          .rating {
-            color: #fbbf24;
-            font-size: 1rem;
-          }
-        }
-      }
-      
-      .review-text {
-        color: var(--color-text-dark);
-        line-height: 1.6;
-        font-size: 0.95rem;
-      }
-    }
-
+    /* Carousel Dots */
     .carousel-dots {
       display: flex;
       justify-content: center;
-      gap: 0.5rem;
+      gap: 8px;
+      margin-bottom: 50px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #95A99C;
+      opacity: 0.3;
+      transition: opacity 0.3s ease;
       
-      .dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: var(--color-text-light);
-        opacity: 0.3;
-        transition: opacity 0.3s;
-        
-        &.active {
-          opacity: 1;
-          background: var(--color-primary-dark);
-        }
+      &.active {
+        opacity: 1;
+        background: #5a6f5e;
       }
     }
 
+    /* WRAPPER */
+    .reviews-carousel-wrapper {
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+    }
+
+    /* EDGE FADE */
+    .reviews-carousel-wrapper::before,
+    .reviews-carousel-wrapper::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      width: 120px;
+      height: 100%;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .reviews-carousel-wrapper::before {
+      left: 0;
+      background: linear-gradient(to right, #E8E4D9, transparent);
+    }
+
+    .reviews-carousel-wrapper::after {
+      right: 0;
+      background: linear-gradient(to left, #E8E4D9, transparent);
+    }
+
+    /* TRACK */
+    .carousel-track {
+      display: flex;
+      gap: 32px;
+      width: max-content;
+    }
+
+    .loading-track {
+      justify-content: center;
+      width: 100%;
+    }
+
+    /* CARD */
+    .review-card {
+      width: 420px;
+      height: 240px;
+      background: #8FA39A;
+      border-radius: 24px;
+      padding: 24px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    /* HEADER */
+    .review-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* AVATAR */
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid #2E4A3F;
+      background: rgba(46, 74, 63, 0.2);
+      flex-shrink: 0;
+    }
+
+    /* META */
+    .review-meta {
+      flex: 1;
+      
+      h4 {
+        margin: 0 0 4px 0;
+        font-family: 'Sofia Sans', sans-serif;
+        font-size: 16px;
+        font-weight: 600;
+        color: #1f1f1f;
+      }
+    }
+
+    .stars {
+      font-size: 14px;
+      color: #FFD700;
+      letter-spacing: 2px;
+    }
+
+    /* DIVIDER */
+    .divider {
+      height: 1px;
+      background: #2E4A3F;
+      opacity: 0.4;
+      margin: 12px 0;
+    }
+
+    /* INNER BOX */
+    .review-body {
+      flex: 1;
+      border: 1.5px solid #2E4A3F;
+      border-radius: 16px;
+      padding: 16px;
+      font-family: 'Sofia Sans', sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #2E4A3F;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    /* Loading State */
+    .review-card.skeleton {
+      background: rgba(143, 163, 154, 0.5);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .skeleton-shimmer {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.2) 50%,
+        transparent 100%
+      );
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* Empty State */
     .empty-state {
-      padding: 3rem;
-      color: var(--color-text-light);
+      text-align: center;
+      padding: 60px 20px;
+      
+      p {
+        font-family: 'Sofia Sans', sans-serif;
+        font-size: 16px;
+        color: #5a5a5a;
+        margin: 0;
+      }
     }
 
-    @keyframes scrollReviews {
-      0% {
-        transform: translateX(0);
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+      .reviews-section {
+        padding: 80px 0;
       }
-      100% {
-        transform: translateX(-50%);
+
+      .review-card {
+        width: 380px;
+        height: 220px;
+      }
+
+      .carousel-track {
+        gap: 28px;
       }
     }
 
     @media (max-width: 768px) {
+      .reviews-section {
+        padding: 60px 0;
+      }
+
       .review-card {
-        width: 300px;
+        width: 320px;
+        height: 200px;
+        padding: 20px;
+      }
+
+      .carousel-track {
+        gap: 24px;
+      }
+
+      .review-meta h4 {
+        font-size: 14px;
+      }
+
+      .review-body {
+        font-size: 13px;
+        padding: 14px;
+      }
+
+      .reviews-carousel-wrapper::before,
+      .reviews-carousel-wrapper::after {
+        width: 80px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .reviews-section {
+        padding: 50px 0;
+      }
+
+      .review-card {
+        width: 280px;
+        height: 180px;
+        padding: 18px;
+      }
+
+      .carousel-track {
+        gap: 20px;
+      }
+
+      .avatar {
+        width: 36px;
+        height: 36px;
+      }
+
+      .review-meta h4 {
+        font-size: 13px;
+      }
+
+      .review-body {
+        font-size: 12px;
+        padding: 12px;
+      }
+
+      .reviews-carousel-wrapper::before,
+      .reviews-carousel-wrapper::after {
+        width: 60px;
       }
     }
   `]
 })
-export class ReviewsComponent implements OnInit {
+export class ReviewsComponent implements OnInit, OnDestroy, AfterViewInit {
+  @ViewChild('track', { static: false }) track!: ElementRef;
+  
   reviews: Review[] = [];
   displayReviews: Review[] = [];
-  loading = false;
+  loading = true;
+  marqueeAnimation: any;
 
-  constructor(private reviewService: ReviewService) {}
+  constructor(
+    private reviewService: ReviewService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit() {
+    this.loadReviews();
+  }
+
+  ngAfterViewInit() {
+    // Retry marquee initialization if data is already loaded
+    setTimeout(() => {
+      if (!this.loading && this.displayReviews.length > 0 && this.track) {
+        console.log('AfterViewInit: Initializing marquee');
+        this.initMarquee();
+      }
+    }, 300);
+  }
+
+  ngOnDestroy() {
+    if (this.marqueeAnimation) {
+      this.marqueeAnimation.kill();
+    }
+  }
+
+  loadReviews() {
     this.loading = true;
     this.reviewService.getAllReviews().subscribe({
       next: (response) => {
+        console.log('Reviews API Response:', response);
         if (response.success && response.data) {
-          this.reviews = response.data;
-          // Duplicate reviews for infinite scroll effect
-          this.displayReviews = [...this.reviews, ...this.reviews];
+          // Handle paginated response
+          const reviewData = Array.isArray(response.data) 
+            ? response.data 
+            : (response.data as any).content || [];
+          
+          console.log('Review Data:', reviewData);
+          
+          // Filter featured reviews
+          this.reviews = reviewData.filter((r: Review) => r.isFeatured !== false);
+          
+          console.log('Filtered Reviews:', this.reviews);
+          
+          // Duplicate once for seamless loop
+          if (this.reviews.length > 0) {
+            this.displayReviews = [...this.reviews, ...this.reviews];
+            console.log('Display Reviews:', this.displayReviews);
+          }
         }
         this.loading = false;
+        this.cdr.detectChanges();
+        
+        // Initialize marquee after view updates
+        setTimeout(() => {
+          if (this.displayReviews.length > 0 && this.track) {
+            console.log('Initializing marquee...');
+            this.initMarquee();
+          } else {
+            console.log('Cannot init marquee:', {
+              hasReviews: this.displayReviews.length > 0,
+              hasTrack: !!this.track
+            });
+          }
+        }, 200);
       },
       error: (error) => {
         console.error('Error loading reviews:', error);
@@ -192,7 +439,44 @@ export class ReviewsComponent implements OnInit {
     });
   }
 
+  initMarquee() {
+    if (!this.track || !this.track.nativeElement) {
+      console.error('Track element not found');
+      return;
+    }
+    
+    const el = this.track.nativeElement;
+    console.log('Track element:', el);
+    console.log('Track scrollWidth:', el.scrollWidth);
+    
+    // Total width of half content (one set of reviews)
+    const totalWidth = el.scrollWidth / 2;
+    console.log('Total width for animation:', totalWidth);
+    
+    if (totalWidth === 0) {
+      console.error('Total width is 0, cannot animate');
+      return;
+    }
+    
+    this.marqueeAnimation = gsap.to(el, {
+      x: -totalWidth,
+      duration: 20, // Control speed (lower = faster)
+      ease: "none",
+      repeat: -1,
+      modifiers: {
+        x: gsap.utils.unitize((x: string) => parseFloat(x) % totalWidth)
+      },
+      onStart: () => {
+        console.log('GSAP animation started');
+      }
+    });
+  }
+
   getStars(rating: number): number[] {
     return Array(rating).fill(0);
+  }
+
+  trackById(index: number, item: Review): number {
+    return item.id;
   }
 }
