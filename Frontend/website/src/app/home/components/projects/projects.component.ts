@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ProjectService } from '../../../shared/services/project.service';
 import { Project } from '../../../shared/models/project.model';
@@ -11,167 +11,233 @@ import { environment } from '../../../environments/environment';
   template: `
     <section class="projects-section" id="projects">
       <div class="container">
-        <div class="projects-container">
-          <h2 class="section-title">OUR<br>WORKS</h2>
-          
-          <div class="projects-grid" *ngIf="projects.length > 0">
-            <div class="project-card" *ngFor="let project of projects.slice(0, 4)">
-              <div class="project-image">
-                <img 
-                  [src]="project.coverImageUrl ? environment.fileBaseUrl + project.coverImageUrl : '/yc-assets/don-kaveen-NFbwes_e-jI-unsplash.jpg'" 
-                  [alt]="project.title"
-                />
-              </div>
-              <h3 class="project-title">{{ project.title }}</h3>
+        <h2 class="section-title">OUR<br>WORKS</h2>
+        
+        <div class="projects-grid" *ngIf="displayProjects.length > 0">
+          <!-- Show projects when loaded -->
+          <div class="project-card" *ngFor="let project of displayProjects">
+            <div class="project-image-wrapper">
+              <img 
+                [src]="getProjectImage(project)" 
+                [alt]="project.title"
+                class="project-image"
+              />
             </div>
+            <div class="project-name">{{ project.title }}</div>
           </div>
-          
-          <div class="empty-state" *ngIf="projects.length === 0 && !loading">
-            <div class="project-card placeholder" *ngFor="let i of [1,2,3,4]">
-              <div class="project-image">
-                <img [src]="getPlaceholderImage(i-1)" alt="Project" />
-              </div>
-              <h3 class="project-title">Project {{ i }}</h3>
-            </div>
-          </div>
-          
-          <div class="view-all-btn">
-            <button class="btn-primary">view all →</button>
-          </div>
+        </div>
+
+        <div *ngIf="displayProjects.length === 0 && !loading" class="no-projects">
+          <p>No projects available</p>
+        </div>
+
+        <div *ngIf="loading" class="loading">
+          <p>Loading projects...</p>
+        </div>
+        
+        <div class="view-all-wrapper">
+          <button class="btn-view-all">view all →</button>
         </div>
       </div>
     </section>
   `,
   styles: [`
     .projects-section {
-      padding: var(--spacing-xl) 0;
-      background-color: var(--color-cream);
+      padding: 5rem 0;
+      background-color: #FFFFFF;
     }
 
-    .projects-container {
-      border: 3px solid var(--color-text-dark);
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 3rem 2rem;
+      border: 2px solid #2d2d2d;
       border-radius: 24px;
-      padding: 3rem;
-      background-color: var(--color-white);
     }
 
     .section-title {
-      font-size: 4rem;
+      font-family: 'Ade', serif;
+      font-size: 96px;
+      font-weight: 400;
+      font-style: normal;
+      line-height: 100%;
+      letter-spacing: 0%;
+      color: #46563B;
       margin: 0 0 3rem 0;
-      color: var(--color-text-dark);
-      line-height: 1.1;
-      font-weight: 300;
+      width: 482.49px;
+      height: 190.94px;
+      transform: rotate(0.31deg);
+      opacity: 1;
     }
 
     .projects-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 2rem;
-      margin-bottom: 2rem;
-    }
-
-    .empty-state {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 2rem;
-      margin-bottom: 2rem;
+      grid-template-columns: repeat(4, 289px);
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+      justify-content: center;
     }
 
     .project-card {
-      background: var(--color-beige-light);
-      border-radius: var(--radius-lg);
-      overflow: hidden;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+      background-color: #CFD0AE;
+      border-radius: 12px;
+      padding: 9px;
+      width: 289px;
+      height: 418px;
       
       &:hover {
         transform: translateY(-8px);
-        box-shadow: var(--shadow-lg);
-      }
-      
-      .project-image {
-        height: 250px;
-        overflow: hidden;
-        
-        img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          transition: transform 0.3s ease;
-        }
-      }
-      
-      &:hover .project-image img {
-        transform: scale(1.1);
-      }
-      
-      .project-title {
-        padding: 1.5rem;
-        text-align: center;
-        font-size: 0.95rem;
-        color: var(--color-text-dark);
-        font-family: var(--font-body);
-        font-weight: 400;
       }
     }
 
-    .view-all-btn {
+    .project-image-wrapper {
+      width: 271px;
+      height: 342px;
+      border-radius: 8px;
+      overflow: hidden;
+      background-color: #e5e5e5;
+      margin-bottom: 1rem;
+      flex-shrink: 0;
+    }
+
+    .project-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+
+    .project-card:hover .project-image {
+      transform: scale(1.05);
+    }
+
+    .project-name {
+      text-align: center;
+      font-family: 'Sofia Sans', sans-serif;
+      font-size: 20px;
+      font-weight: 500;
+      font-style: normal;
+      line-height: 100%;
+      letter-spacing: 0%;
+      color: #2d2d2d;
+      padding: 0.5rem;
+    }
+
+    .view-all-wrapper {
       text-align: center;
       margin-top: 1rem;
     }
 
+    .btn-view-all {
+      background-color: #144F3C;
+      color: #ffffff;
+      border: none;
+      padding: 0.875rem 2.25rem;
+      font-size: 0.9375rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      letter-spacing: 0.025em;
+      transition: all 0.3s ease;
+      text-transform: lowercase;
+      
+      &:hover {
+        background-color: #0d3a2a;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(20, 79, 60, 0.3);
+      }
+    }
+
+    .no-projects, .loading {
+      text-align: center;
+      padding: 2rem;
+      color: #666;
+      font-size: 1.125rem;
+    }
+
     @media (max-width: 1200px) {
-      .projects-grid,
-      .empty-state {
-        grid-template-columns: repeat(2, 1fr);
+      .projects-grid {
+        grid-template-columns: repeat(2, 289px);
+      }
+      
+      .section-title {
+        font-size: 4rem;
       }
     }
 
     @media (max-width: 768px) {
-      .projects-grid,
-      .empty-state {
-        grid-template-columns: 1fr;
+      .projects-section {
+        padding: 3rem 0;
+      }
+      
+      .projects-grid {
+        grid-template-columns: 289px;
+        gap: 1.5rem;
       }
       
       .section-title {
-        font-size: 2.5rem;
+        font-size: 3rem;
+        margin-bottom: 2rem;
       }
       
-      .projects-container {
-        padding: 2rem 1.5rem;
+      .container {
+        padding: 2rem 1rem;
       }
     }
   `]
 })
 export class ProjectsComponent implements OnInit {
-  projects: Project[] = [];
-  loading = false;
-  environment = environment;
+  displayProjects: Project[] = [];
+  loading = true;
 
-  constructor(private projectService: ProjectService) {}
+  constructor(
+    private projectService: ProjectService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.loading = true;
     this.projectService.getFeaturedProjects().subscribe({
       next: (response) => {
-        if (response.success && response.data) {
-          this.projects = response.data;
-        }
+        console.log('API Response:', response);
         this.loading = false;
+        if (response.success && response.data?.content) {
+          this.displayProjects = [...response.data.content.slice(0, 4)];
+          console.log('Display projects set to:', this.displayProjects);
+          console.log('Display projects length:', this.displayProjects.length);
+          this.cdr.detectChanges();
+        }
       },
       error: (error) => {
         console.error('Error loading projects:', error);
         this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }
 
-  getPlaceholderImage(index: number): string {
-    const placeholders = [
-      '/yc-assets/pexels-athena-2962066.jpg',
-      '/yc-assets/pexels-iremonat-14564071.jpg',
-      '/yc-assets/don-kaveen-NFbwes_e-jI-unsplash.jpg',
-      '/yc-assets/jason-briscoe-AQl-J19ocWE-unsplash.jpg'
-    ];
-    return placeholders[index % placeholders.length];
+  getProjectImage(project: Project): string {
+    console.log('Project:', project.title, 'coverMedia:', project.coverMedia, 'coverMediaId:', project.coverMediaId);
+    
+    if (project.coverMedia?.url) {
+      // Check if URL is already absolute (starts with http:// or https://)
+      if (project.coverMedia.url.startsWith('http://') || project.coverMedia.url.startsWith('https://')) {
+        console.log('Using absolute coverMedia URL:', project.coverMedia.url);
+        return project.coverMedia.url;
+      }
+      
+      // Otherwise, construct relative URL
+      const fullUrl = `${environment.fileBaseUrl}${project.coverMedia.url}`;
+      console.log('Using relative coverMedia URL:', fullUrl);
+      return fullUrl;
+    }
+    
+    // Fallback to a placeholder image service
+    console.log('Using placeholder image for:', project.title);
+    return 'https://via.placeholder.com/400x300/4a5d4f/ffffff?text=' + encodeURIComponent(project.title);
   }
 }
