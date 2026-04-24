@@ -13,7 +13,8 @@ export class ClientService {
 
   constructor(private http: HttpClient) {}
 
-  getAllClients(): Observable<ApiResponse<Client[]>> {
-    return this.http.get<ApiResponse<Client[]>>(this.apiUrl);
+  getAllClients(): Observable<ApiResponse<any>> {
+    // Get all clients with a large page size to fetch all at once
+    return this.http.get<ApiResponse<any>>(`${this.apiUrl}?page=0&size=100`);
   }
 }

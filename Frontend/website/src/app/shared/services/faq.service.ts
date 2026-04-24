@@ -13,7 +13,8 @@ export class FaqService {
 
   constructor(private http: HttpClient) {}
 
-  getAllFaqs(): Observable<ApiResponse<FAQ[]>> {
-    return this.http.get<ApiResponse<FAQ[]>>(this.apiUrl);
+  getAllFaqs(): Observable<ApiResponse<any>> {
+    // Get all FAQs with a large page size to fetch all at once
+    return this.http.get<ApiResponse<any>>(`${this.apiUrl}?page=0&size=100`);
   }
 }

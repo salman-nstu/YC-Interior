@@ -35,6 +35,15 @@ public class Media {
     @Column(name = "alt_text")
     private String altText;
 
+    @Column(name = "width")
+    private Integer width;
+
+    @Column(name = "height")
+    private Integer height;
+
+    @Column(name = "aspect_ratio", length = 20)
+    private String aspectRatio;
+
     @Column(name = "uploaded_by")
     private Long uploadedBy;
 

@@ -1,8 +1,15 @@
 export interface Client {
   id: number;
   name: string;
-  logoUrl: string;
-  websiteUrl: string | null;
+  logoMediaId: number | null;
+  logoMedia?: {
+    id: number;
+    url: string;
+    fileName: string;
+    mimeType: string;
+    category: string;
+  };
   displayOrder: number;
   createdAt: string;
+  updatedAt: string;
 }
