@@ -140,23 +140,22 @@ import { FAQ } from '../../../shared/models/faq.model';
 })
 export class FaqComponent implements OnInit {
   faqs: FAQ[] = [];
-  loading = false;
+  loading = true;
   expandedIndex: number | null = null;
 
   constructor(private faqService: FaqService) {}
 
   ngOnInit() {
-    this.loading = true;
     this.faqService.getAllFaqs().subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.faqs = response.data;
         }
-        this.loading = false;
+        setTimeout(() => this.loading = false, 0);
       },
       error: (error) => {
         console.error('Error loading FAQs:', error);
-        this.loading = false;
+        setTimeout(() => this.loading = false, 0);
       }
     });
   }

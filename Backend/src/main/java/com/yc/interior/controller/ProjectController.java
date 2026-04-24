@@ -53,6 +53,15 @@ public class ProjectController {
         return ResponseEntity.ok(ApiResponse.ok("Project deleted", null));
     }
 
+    @GetMapping("/featured")
+    @Operation(summary = "Get featured projects for homepage")
+    public ResponseEntity<ApiResponse<PageResponse<ProjectResponse>>> getFeatured(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "4") int size) {
+        return ResponseEntity.ok(ApiResponse.ok(PageResponse.from(service.getAll(null, "published", null, true,
+                PageRequest.of(page, size, Sort.by("displayOrder").ascending().and(Sort.by("createdAt").descending()))))));
+    }
+
     @PatchMapping("/{id}/featured")
     @Operation(summary = "Set featured status for a project")
     public ResponseEntity<ApiResponse<ProjectResponse>> setFeatured(
