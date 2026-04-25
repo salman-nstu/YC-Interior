@@ -74,31 +74,34 @@ public class GalleryServiceImpl implements GalleryService {
         entity.setMediaId(request.getMediaId());
         if (request.getIsFeatured() != null) entity.setIsFeatured(request.getIsFeatured());
         
-        // Handle display order changes with shifting
-        if (request.getDisplayOrder() != null) {
-            Integer oldOrder = entity.getDisplayOrder();
+        // Handle display order changes
+        if (request.getDisplayOrder() != null && !request.getDisplayOrder().equals(entity.getDisplayOrder())) {
             Integer newOrder = request.getDisplayOrder();
+            Integer oldOrder = entity.getDisplayOrder();
             
-            if (oldOrder != null && !oldOrder.equals(newOrder)) {
+            if (oldOrder != null && (newOrder >= 0 && newOrder <= 6)) {
+                // If moving to a different order, shift items
                 if (newOrder < oldOrder) {
-                    // Shift items between newOrder and oldOrder up by 1
+                    // Moving up (lower order number)
                     galleryRepository.findAll().stream()
-                            .filter(g -> g.getDisplayOrder() != null && g.getDisplayOrder() >= newOrder && g.getDisplayOrder() < oldOrder && !g.getId().equals(id))
+                            .filter(g -> !g.getId().equals(id) && g.getDisplayOrder() != null && 
+                                    g.getDisplayOrder() >= newOrder && g.getDisplayOrder() < oldOrder)
                             .forEach(g -> {
                                 g.setDisplayOrder(g.getDisplayOrder() + 1);
                                 galleryRepository.save(g);
                             });
                 } else if (newOrder > oldOrder) {
-                    // Shift items between oldOrder and newOrder down by 1
+                    // Moving down (higher order number)
                     galleryRepository.findAll().stream()
-                            .filter(g -> g.getDisplayOrder() != null && g.getDisplayOrder() > oldOrder && g.getDisplayOrder() <= newOrder && !g.getId().equals(id))
+                            .filter(g -> !g.getId().equals(id) && g.getDisplayOrder() != null && 
+                                    g.getDisplayOrder() > oldOrder && g.getDisplayOrder() <= newOrder)
                             .forEach(g -> {
                                 g.setDisplayOrder(g.getDisplayOrder() - 1);
                                 galleryRepository.save(g);
                             });
                 }
+                entity.setDisplayOrder(newOrder);
             }
-            entity.setDisplayOrder(newOrder);
         }
         
         return toResponse(galleryRepository.save(entity));

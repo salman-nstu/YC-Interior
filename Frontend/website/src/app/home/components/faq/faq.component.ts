@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FaqService } from '../../../shared/services/faq.service';
 import { FAQ } from '../../../shared/models/faq.model';
@@ -349,7 +349,7 @@ export class FaqComponent implements OnInit {
   loading = true;
   expandedIndex: number | null = null;
 
-  constructor(private faqService: FaqService) {}
+  constructor(private faqService: FaqService, private cdr: ChangeDetectorRef, private zone: NgZone) {}
 
   ngOnInit() {
     this.loadFaqs();
@@ -359,22 +359,28 @@ export class FaqComponent implements OnInit {
     this.loading = true;
     this.faqService.getAllFaqs().subscribe({
       next: (response) => {
-        if (response.success && response.data) {
-          // Check if data is an array or has content property
-          const faqData = Array.isArray(response.data) 
-            ? response.data 
-            : (response.data as any).content || [];
-          
-          // Sort by displayOrder
-          this.faqs = faqData.sort((a: FAQ, b: FAQ) => 
-            (a.displayOrder || 0) - (b.displayOrder || 0)
-          );
-        }
-        this.loading = false;
+        this.zone.run(() => {
+          if (response.success && response.data) {
+            // Check if data is an array or has content property
+            const faqData = Array.isArray(response.data) 
+              ? response.data 
+              : (response.data as any).content || [];
+            
+            // Sort by displayOrder
+            this.faqs = faqData.sort((a: FAQ, b: FAQ) => 
+              (a.displayOrder || 0) - (b.displayOrder || 0)
+            );
+          }
+          this.loading = false;
+          this.cdr.detectChanges();
+        });
       },
       error: (error) => {
         console.error('Error loading FAQs:', error);
-        this.loading = false;
+        this.zone.run(() => {
+          this.loading = false;
+          this.cdr.detectChanges();
+        });
       }
     });
   }

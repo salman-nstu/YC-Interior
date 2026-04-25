@@ -46,11 +46,12 @@ import { MediaResponse } from '../../../core/models/media.model';
           </mat-form-field>
 
           <mat-form-field appearance="outline">
-            <mat-label>Category</mat-label>
-            <mat-select formControlName="categoryId">
-              <mat-option [value]="null">None</mat-option>
-              <mat-option *ngFor="let c of categories" [value]="c.id">{{ c.name }}</mat-option>
+            <mat-label>Category *</mat-label>
+            <mat-select formControlName="categoryType">
+              <mat-option value="Residential">Residential</mat-option>
+              <mat-option value="Commercial">Commercial</mat-option>
             </mat-select>
+            <mat-error>Category is required</mat-error>
           </mat-form-field>
 
           <mat-form-field appearance="outline">
@@ -136,13 +137,12 @@ export class ProjectFormComponent implements OnInit {
     title: ['', Validators.required],
     slug: [''],
     description: [''],
-    categoryId: [null as number | null],
+    categoryType: ['Residential', Validators.required],
     status: ['published'],
     isFeatured: [false],
     displayOrder: [0]
   });
 
-  categories: any[] = [];
   coverMedia: MediaResponse | null = null;
   additionalImages: MediaResponse[] = [];
   isEdit = false;
@@ -151,7 +151,6 @@ export class ProjectFormComponent implements OnInit {
   private editId: number | null = null;
 
   ngOnInit() {
-    this.svc.getCategories().subscribe(r => this.categories = r.data || []);
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.isEdit = true;
@@ -160,7 +159,7 @@ export class ProjectFormComponent implements OnInit {
         const p = res.data;
         this.form.patchValue({
           title: p.title, slug: p.slug, description: p.description,
-          categoryId: p.categoryId, status: p.status,
+          categoryType: p.categoryType, status: p.status,
           isFeatured: p.isFeatured, displayOrder: p.displayOrder
         });
         this.coverMedia = p.coverMedia || null;

@@ -1,17 +1,12 @@
 import { MediaResponse } from './media.model';
 
-export interface ProjectCategory {
-  id: number;
-  name: string;
-}
-
 export interface ProjectResponse {
   id: number;
   title: string;
   slug: string;
   description: string;
   coverMediaId: number;
-  categoryId: number;
+  categoryType: string;
   status: string;
   publishedAt: string;
   isFeatured: boolean;
@@ -19,7 +14,6 @@ export interface ProjectResponse {
   createdAt: string;
   updatedAt: string;
   coverMedia: MediaResponse;
-  category: ProjectCategory;
   images: MediaResponse[];
 }
 
@@ -28,7 +22,7 @@ export interface ProjectRequest {
   slug?: string;
   description?: string;
   coverMediaId?: number;
-  categoryId?: number;
+  categoryType: string;
   status?: string;
   isFeatured?: boolean;
   displayOrder?: number;

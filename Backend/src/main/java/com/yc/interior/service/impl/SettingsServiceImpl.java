@@ -39,6 +39,8 @@ public class SettingsServiceImpl implements SettingsService {
         s.setFacebookUrl(request.getFacebookUrl());
         s.setInstagramUrl(request.getInstagramUrl());
         s.setLinkedinUrl(request.getLinkedinUrl());
+        s.setWhatsappUrl(request.getWhatsappUrl());
+        s.setYoutubeUrl(request.getYoutubeUrl());
         return toResponse(settingsRepository.save(s));
     }
 
@@ -67,6 +69,8 @@ public class SettingsServiceImpl implements SettingsService {
                 .facebookUrl(s.getFacebookUrl())
                 .instagramUrl(s.getInstagramUrl())
                 .linkedinUrl(s.getLinkedinUrl())
+                .whatsappUrl(s.getWhatsappUrl())
+                .youtubeUrl(s.getYoutubeUrl())
                 .updatedAt(s.getUpdatedAt())
                 .logoMedia(logoMedia)
                 .faviconMedia(faviconMedia)

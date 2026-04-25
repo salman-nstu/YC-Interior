@@ -64,31 +64,34 @@ public class TeamMemberServiceImpl implements TeamMemberService {
         entity.setDesignation(request.getDesignation());
         entity.setMediaId(request.getMediaId());
         
-        // Handle display order changes with shifting
-        if (request.getDisplayOrder() != null) {
-            Integer oldOrder = entity.getDisplayOrder();
+        // Handle display order changes
+        if (request.getDisplayOrder() != null && !request.getDisplayOrder().equals(entity.getDisplayOrder())) {
             Integer newOrder = request.getDisplayOrder();
+            Integer oldOrder = entity.getDisplayOrder();
             
-            if (oldOrder != null && !oldOrder.equals(newOrder)) {
+            if (oldOrder != null) {
+                // If moving to a different order, shift items
                 if (newOrder < oldOrder) {
-                    // Shift items between newOrder and oldOrder up by 1
+                    // Moving up (lower order number)
                     repository.findAll().stream()
-                            .filter(t -> t.getDisplayOrder() != null && t.getDisplayOrder() >= newOrder && t.getDisplayOrder() < oldOrder && !t.getId().equals(id))
+                            .filter(t -> !t.getId().equals(id) && t.getDisplayOrder() != null && 
+                                    t.getDisplayOrder() >= newOrder && t.getDisplayOrder() < oldOrder)
                             .forEach(t -> {
                                 t.setDisplayOrder(t.getDisplayOrder() + 1);
                                 repository.save(t);
                             });
                 } else if (newOrder > oldOrder) {
-                    // Shift items between oldOrder and newOrder down by 1
+                    // Moving down (higher order number)
                     repository.findAll().stream()
-                            .filter(t -> t.getDisplayOrder() != null && t.getDisplayOrder() > oldOrder && t.getDisplayOrder() <= newOrder && !t.getId().equals(id))
+                            .filter(t -> !t.getId().equals(id) && t.getDisplayOrder() != null && 
+                                    t.getDisplayOrder() > oldOrder && t.getDisplayOrder() <= newOrder)
                             .forEach(t -> {
                                 t.setDisplayOrder(t.getDisplayOrder() - 1);
                                 repository.save(t);
                             });
                 }
+                entity.setDisplayOrder(newOrder);
             }
-            entity.setDisplayOrder(newOrder);
         }
         
         return toResponse(repository.save(entity));

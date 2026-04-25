@@ -16,6 +16,8 @@ public class SettingsResponse {
     private String facebookUrl;
     private String instagramUrl;
     private String linkedinUrl;
+    private String whatsappUrl;
+    private String youtubeUrl;
     private LocalDateTime updatedAt;
     private MediaResponse logoMedia;
     private MediaResponse faviconMedia;

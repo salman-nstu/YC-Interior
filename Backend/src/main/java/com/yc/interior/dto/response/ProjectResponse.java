@@ -11,7 +11,7 @@ public class ProjectResponse {
     private String slug;
     private String description;
     private Long coverMediaId;
-    private Long categoryId;
+    private String categoryType;
     private String status;
     private LocalDateTime publishedAt;
     private Boolean isFeatured;
@@ -19,6 +19,5 @@ public class ProjectResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private MediaResponse coverMedia;
-    private ProjectCategoryResponse category;
     private List<MediaResponse> images;
 }

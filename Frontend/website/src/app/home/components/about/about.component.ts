@@ -1,5 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { AboutService } from '../../../shared/services/about.service';
 import { AboutSection } from '../../../shared/models/about.model';
 
@@ -18,7 +19,7 @@ import { AboutSection } from '../../../shared/models/about.model';
             <ng-container *ngIf="!loading && aboutSection && aboutSection.description">
               <div class="about-text">
                 <p>{{ aboutSection.description }}</p>
-                <button class="btn-learn-more">learn more →</button>
+                <button (click)="navigateToAbout()" class="btn-learn-more">learn more →</button>
               </div>
             </ng-container>
 
@@ -123,6 +124,8 @@ import { AboutSection } from '../../../shared/models/about.model';
       border: none;
       cursor: pointer;
       align-self: flex-start;
+      text-decoration: none;
+      display: inline-block;
     }
     
     .btn-learn-more:hover {
@@ -177,11 +180,20 @@ export class AboutComponent implements OnInit {
 
   constructor(
     private aboutService: AboutService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private router: Router
   ) {}
 
   ngOnInit() {
     this.loadAbout();
+  }
+
+  navigateToAbout() {
+    // First, scroll to top instantly (before navigation)
+    window.scrollTo({ top: 0, behavior: 'auto' });
+    
+    // Then navigate to about page
+    this.router.navigate(['/about']);
   }
 
   loadAbout() {

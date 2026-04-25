@@ -14,12 +14,12 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
     @Query("SELECT p FROM Project p WHERE p.deletedAt IS NULL " +
            "AND (:keyword IS NULL OR LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
            "AND (:status IS NULL OR p.status = :status) " +
-           "AND (:categoryId IS NULL OR p.categoryId = :categoryId) " +
+           "AND (:categoryType IS NULL OR p.categoryType = :categoryType) " +
            "AND (:featured IS NULL OR p.isFeatured = :featured)")
     Page<Project> findAllWithFilters(
         @Param("keyword") String keyword,
         @Param("status") Project.ProjectStatus status,
-        @Param("categoryId") Long categoryId,
+        @Param("categoryType") String categoryType,
         @Param("featured") Boolean featured,
         Pageable pageable
     );

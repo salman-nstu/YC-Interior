@@ -52,14 +52,14 @@ import { SettingsStateService } from '../../core/services/settings-state.service
           <!-- Contact -->
           <mat-tab label="Contact">
             <div class="form-grid" style="margin-top:16px">
-              <mat-form-field appearance="outline">
-                <mat-label>Email</mat-label>
-                <input matInput formControlName="email" type="email">
+              <mat-form-field appearance="outline" class="form-full">
+                <mat-label>Email (one per line or comma-separated)</mat-label>
+                <textarea matInput formControlName="email" rows="3" placeholder="email1@example.com&#10;email2@example.com"></textarea>
                 <mat-icon matPrefix>email</mat-icon>
               </mat-form-field>
-              <mat-form-field appearance="outline">
-                <mat-label>Phone</mat-label>
-                <input matInput formControlName="phone">
+              <mat-form-field appearance="outline" class="form-full">
+                <mat-label>Phone (one per line or comma-separated)</mat-label>
+                <textarea matInput formControlName="phone" rows="3" placeholder="+880 1234567890&#10;+880 9876543210"></textarea>
                 <mat-icon matPrefix>phone</mat-icon>
               </mat-form-field>
               <mat-form-field appearance="outline" class="form-full">
@@ -92,6 +92,16 @@ import { SettingsStateService } from '../../core/services/settings-state.service
                 <input matInput formControlName="linkedinUrl">
                 <mat-icon matPrefix>work</mat-icon>
               </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>WhatsApp URL</mat-label>
+                <input matInput formControlName="whatsappUrl" placeholder="https://wa.me/1234567890">
+                <mat-icon matPrefix>chat</mat-icon>
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>YouTube URL</mat-label>
+                <input matInput formControlName="youtubeUrl">
+                <mat-icon matPrefix>video_library</mat-icon>
+              </mat-form-field>
             </div>
           </mat-tab>
         </mat-tab-group>
@@ -122,7 +132,9 @@ export class SettingsComponent implements OnInit {
     mapEmbedUrl: [''],
     facebookUrl: [''],
     instagramUrl: [''],
-    linkedinUrl: ['']
+    linkedinUrl: [''],
+    whatsappUrl: [''],
+    youtubeUrl: ['']
   });
 
   logoMedia: MediaResponse | null = null;
@@ -144,7 +156,9 @@ export class SettingsComponent implements OnInit {
             this.form.patchValue({
               siteName: s.siteName, email: s.email, phone: s.phone,
               address: s.address, mapEmbedUrl: s.mapEmbedUrl,
-              facebookUrl: s.facebookUrl, instagramUrl: s.instagramUrl, linkedinUrl: s.linkedinUrl
+              facebookUrl: s.facebookUrl, instagramUrl: s.instagramUrl, 
+              linkedinUrl: s.linkedinUrl, whatsappUrl: s.whatsappUrl, 
+              youtubeUrl: s.youtubeUrl
             });
             this.logoMedia = s.logoMedia || null;
             this.faviconMedia = s.faviconMedia || null;

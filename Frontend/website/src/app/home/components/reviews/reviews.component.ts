@@ -14,19 +14,12 @@ import { gsap } from 'gsap';
       <div class="quote-icon">
         <svg width="80" height="60" viewBox="0 0 80 60" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M15 37.5V22.5C15 15 18.75 11.25 26.25 11.25H30V18.75H26.25C22.5 18.75 21 20.25 21 24V26.25H30V37.5H15ZM37.5 37.5V22.5C37.5 15 41.25 11.25 48.75 11.25H52.5V18.75H48.75C45 18.75 43.5 20.25 43.5 24V26.25H52.5V37.5H37.5Z" 
-                fill="#95A99C" opacity="0.5"/>
+                fill="#5a6f5e" opacity="0.8"/>
         </svg>
       </div>
       
       <!-- Subtitle -->
       <p class="reviews-subtitle">what our customers are saying</p>
-      
-      <!-- Carousel Dots -->
-      <div class="carousel-dots" *ngIf="reviews.length > 0">
-        <span class="dot" 
-              *ngFor="let review of reviews; let i = index" 
-              [class.active]="i === 0"></span>
-      </div>
       
       <!-- Reviews Carousel -->
       <div class="reviews-carousel-wrapper">
@@ -51,7 +44,12 @@ import { gsap } from 'gsap';
                *ngFor="let review of displayReviews; trackBy: trackById">
             <!-- Header -->
             <div class="review-header">
-              <div class="avatar"></div>
+              <div class="avatar">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z" fill="#2E4A3F"/>
+                  <path d="M12 14C6.48 14 2 16.24 2 19V22H22V19C22 16.24 17.52 14 12 14Z" fill="#2E4A3F"/>
+                </svg>
+              </div>
               
               <div class="review-meta">
                 <h4>{{ review.name }}</h4>
@@ -91,39 +89,22 @@ import { gsap } from 'gsap';
       display: flex;
       justify-content: center;
       margin-bottom: 20px;
+      
+      svg path {
+        fill: #5a6f5e;
+        opacity: 0.8;
+      }
     }
 
     /* Subtitle */
     .reviews-subtitle {
       font-family: 'Sofia Sans', sans-serif;
-      font-size: 14px;
-      font-weight: 400;
-      color: #5a5a5a;
+      font-size: 18px;
+      font-weight: 500;
+      color: #3a3a3a;
       text-align: center;
-      margin: 0 0 30px 0;
+      margin: 0 0 50px 0;
       text-transform: lowercase;
-    }
-
-    /* Carousel Dots */
-    .carousel-dots {
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      margin-bottom: 50px;
-    }
-
-    .dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #95A99C;
-      opacity: 0.3;
-      transition: opacity 0.3s ease;
-      
-      &.active {
-        opacity: 1;
-        background: #5a6f5e;
-      }
     }
 
     /* WRAPPER */
@@ -195,6 +176,18 @@ import { gsap } from 'gsap';
       border: 2px solid #2E4A3F;
       background: rgba(46, 74, 63, 0.2);
       flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      
+      svg {
+        width: 24px;
+        height: 24px;
+        
+        path {
+          fill: #2E4A3F;
+        }
+      }
     }
 
     /* META */

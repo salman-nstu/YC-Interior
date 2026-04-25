@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ClientService } from '../../../shared/services/client.service';
 import { Client } from '../../../shared/models/client.model';
 import { environment } from '../../../environments/environment';
+import { gsap } from 'gsap';
 
 @Component({
   selector: 'app-clients',
@@ -32,14 +33,16 @@ import { environment } from '../../../environments/environment';
           </div>
           
           <!-- Client Logos Row -->
-          <div class="clients-logos" *ngIf="!loading && clients.length > 0">
-            <div class="client-card" *ngFor="let client of clients; trackBy: trackById">
-              <img 
-                [src]="getClientLogo(client)" 
-                [alt]="client.name"
-                [title]="client.name"
-                (error)="onImageError($event)"
-              />
+          <div class="clients-carousel-wrapper" *ngIf="!loading && displayClients.length > 0">
+            <div class="clients-logos" #track>
+              <div class="client-card" *ngFor="let client of displayClients; trackBy: trackById">
+                <img 
+                  [src]="getClientLogo(client)" 
+                  [alt]="client.name"
+                  [title]="client.name"
+                  (error)="onImageError($event)"
+                />
+              </div>
             </div>
           </div>
           
@@ -53,7 +56,7 @@ import { environment } from '../../../environments/environment';
   `,
   styles: [`
     .clients-section {
-      background-image: url('/yc-assets/uu.jpg');
+      background-image: url('/yc-assets/download9.jpg');
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
@@ -143,13 +146,41 @@ import { environment } from '../../../environments/environment';
       100% { background-position: -200% 0; }
     }
 
+    /* Client Logos Carousel Wrapper */
+    .clients-carousel-wrapper {
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+    }
+
+    /* Edge Fade */
+    .clients-carousel-wrapper::before,
+    .clients-carousel-wrapper::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      width: 120px;
+      height: 100%;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .clients-carousel-wrapper::before {
+      left: 0;
+      background: linear-gradient(to right, rgba(20, 15, 10, 0.8), transparent);
+    }
+
+    .clients-carousel-wrapper::after {
+      right: 0;
+      background: linear-gradient(to left, rgba(20, 15, 10, 0.8), transparent);
+    }
+
     /* Client Logos Row */
     .clients-logos {
       display: flex;
       gap: 20px;
-      justify-content: center;
-      flex-wrap: wrap;
       align-items: center;
+      width: max-content;
     }
 
     .client-card {
@@ -301,14 +332,35 @@ import { environment } from '../../../environments/environment';
     }
   `]
 })
-export class ClientsComponent implements OnInit {
+export class ClientsComponent implements OnInit, OnDestroy, AfterViewInit {
+  @ViewChild('track', { static: false }) track!: ElementRef;
+  
   clients: Client[] = [];
+  displayClients: Client[] = [];
   loading = true;
+  marqueeAnimation: any;
 
-  constructor(private clientService: ClientService) {}
+  constructor(
+    private clientService: ClientService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit() {
     this.loadClients();
+  }
+
+  ngAfterViewInit() {
+    setTimeout(() => {
+      if (!this.loading && this.displayClients.length > 0 && this.track) {
+        this.initMarquee();
+      }
+    }, 300);
+  }
+
+  ngOnDestroy() {
+    if (this.marqueeAnimation) {
+      this.marqueeAnimation.kill();
+    }
   }
 
   loadClients() {
@@ -317,23 +369,56 @@ export class ClientsComponent implements OnInit {
       next: (response) => {
         console.log('Clients API Response:', response);
         if (response.success && response.data) {
-          // Check if data is an array or has content property (paginated)
           const clientData = Array.isArray(response.data) 
             ? response.data 
             : (response.data as any).content || [];
           
           console.log('Client Data:', clientData);
           
-          // Sort by displayOrder
           this.clients = clientData.sort((a: Client, b: Client) => 
             (a.displayOrder || 0) - (b.displayOrder || 0)
           );
+          
+          // Duplicate for seamless loop
+          if (this.clients.length > 0) {
+            this.displayClients = [...this.clients, ...this.clients, ...this.clients];
+          }
         }
         this.loading = false;
+        this.cdr.detectChanges();
+        
+        setTimeout(() => {
+          if (this.displayClients.length > 0 && this.track) {
+            this.initMarquee();
+          }
+        }, 200);
       },
       error: (error) => {
         console.error('Error loading clients:', error);
         this.loading = false;
+      }
+    });
+  }
+
+  initMarquee() {
+    if (!this.track || !this.track.nativeElement) {
+      return;
+    }
+    
+    const el = this.track.nativeElement;
+    const totalWidth = el.scrollWidth / 3; // Divide by 3 since we tripled the content
+    
+    if (totalWidth === 0) {
+      return;
+    }
+    
+    this.marqueeAnimation = gsap.to(el, {
+      x: -totalWidth,
+      duration: 25, // Adjust speed
+      ease: "none",
+      repeat: -1,
+      modifiers: {
+        x: gsap.utils.unitize((x: string) => parseFloat(x) % totalWidth)
       }
     });
   }

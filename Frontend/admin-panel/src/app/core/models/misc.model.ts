@@ -13,6 +13,8 @@ export interface SettingsResponse {
   facebookUrl: string;
   instagramUrl: string;
   linkedinUrl: string;
+  whatsappUrl: string;
+  youtubeUrl: string;
   updatedAt: string;
   logoMedia: MediaResponse;
   faviconMedia: MediaResponse;
@@ -29,6 +31,8 @@ export interface SettingsRequest {
   facebookUrl?: string;
   instagramUrl?: string;
   linkedinUrl?: string;
+  whatsappUrl?: string;
+  youtubeUrl?: string;
 }
 
 // ─── FAQ ──────────────────────────────────────────────────────────────────────

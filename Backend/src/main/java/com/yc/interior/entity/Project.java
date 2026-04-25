@@ -27,8 +27,8 @@ public class Project {
     @Column(name = "cover_media_id")
     private Long coverMediaId;
 
-    @Column(name = "category_id")
-    private Long categoryId;
+    @Column(name = "category_type", nullable = false)
+    private String categoryType;
 
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "ENUM('draft','published') DEFAULT 'published'")

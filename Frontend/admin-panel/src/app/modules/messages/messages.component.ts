@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ChangeDetectorRef, NgZone } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef, NgZone, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
@@ -6,7 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
-import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { MatDialogModule, MatDialog, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
@@ -14,6 +14,136 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MiscService } from '../../core/services/misc.service';
 import { ContactMessageResponse } from '../../core/models/misc.model';
 import { ConfirmDialogComponent } from '../../shared/confirm-dialog/confirm-dialog.component';
+
+@Component({
+  selector: 'app-message-view-dialog',
+  standalone: true,
+  imports: [CommonModule, MatDialogModule, MatButtonModule, MatIconModule],
+  template: `
+    <div class="dialog-header">
+      <h2 mat-dialog-title>Message Details</h2>
+      <button mat-icon-button mat-dialog-close>
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <mat-dialog-content>
+      <div class="message-details">
+        <div class="detail-row">
+          <label>Status:</label>
+          <span class="badge" [ngClass]="data.isRead ? 'read' : 'unread'">
+            {{ data.isRead ? 'Read' : 'Unread' }}
+          </span>
+        </div>
+        <div class="detail-row">
+          <label>Name:</label>
+          <span>{{ data.name }}</span>
+        </div>
+        <div class="detail-row">
+          <label>Email:</label>
+          <span>{{ data.email }}</span>
+        </div>
+        <div class="detail-row">
+          <label>Phone:</label>
+          <span>{{ data.phone }}</span>
+        </div>
+        <div class="detail-row">
+          <label>Subject:</label>
+          <span>{{ data.subject }}</span>
+        </div>
+        <div class="detail-row">
+          <label>Date:</label>
+          <span>{{ data.createdAt | date:'medium' }}</span>
+        </div>
+        <div class="detail-row message-content">
+          <label>Message:</label>
+          <div class="message-text">{{ data.message }}</div>
+        </div>
+      </div>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+      <button mat-button mat-dialog-close>Close</button>
+    </mat-dialog-actions>
+  `,
+  styles: [`
+    .dialog-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 24px 0;
+      
+      h2 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 500;
+      }
+    }
+
+    mat-dialog-content {
+      padding: 24px;
+      min-width: 500px;
+    }
+
+    .message-details {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .detail-row {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 16px;
+      align-items: start;
+      
+      label {
+        font-weight: 600;
+        color: #666;
+      }
+      
+      span {
+        color: #333;
+      }
+    }
+
+    .message-content {
+      align-items: start;
+      
+      .message-text {
+        background-color: #f5f5f5;
+        padding: 12px;
+        border-radius: 4px;
+        white-space: pre-wrap;
+        word-break: break-word;
+        line-height: 1.6;
+      }
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      
+      &.read {
+        background-color: #e8f5e9;
+        color: #2e7d32;
+      }
+      
+      &.unread {
+        background-color: #ffebee;
+        color: #c62828;
+      }
+    }
+
+    mat-dialog-actions {
+      padding: 16px 24px;
+    }
+  `]
+})
+export class MessageViewDialogComponent {
+  constructor(@Inject(MAT_DIALOG_DATA) public data: ContactMessageResponse) {}
+}
 
 @Component({
   selector: 'app-messages',
@@ -69,6 +199,9 @@ import { ConfirmDialogComponent } from '../../shared/confirm-dialog/confirm-dial
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef>Actions</th>
           <td mat-cell *matCellDef="let row">
+            <button mat-icon-button (click)="viewMessage(row)" matTooltip="View details">
+              <mat-icon>visibility</mat-icon>
+            </button>
             <button mat-icon-button *ngIf="!row.isRead" (click)="markRead(row)" matTooltip="Mark as read">
               <mat-icon>mark_email_read</mat-icon>
             </button>
@@ -124,6 +257,14 @@ export class MessagesComponent implements OnInit {
   }
 
   onPage(e: PageEvent) { this.page = e.pageIndex; this.pageSize = e.pageSize; this.load(); }
+
+  viewMessage(row: ContactMessageResponse) {
+    this.dialog.open(MessageViewDialogComponent, {
+      data: row,
+      width: '600px',
+      maxWidth: '90vw'
+    });
+  }
 
   markRead(row: ContactMessageResponse) {
     this.svc.markRead(row.id).subscribe({
