@@ -21,6 +21,7 @@ import { environment } from '../../../environments/environment';
   styles: [`
     .hero {
       height: 100vh;
+      width: 100%;
       /* HERO BACKGROUND IMAGE - Change the filename below to use a different image from /yc-assets/ folder */
       background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)),
                   url('/yc-assets/download5.png') center/cover no-repeat;
@@ -28,6 +29,7 @@ import { environment } from '../../../environments/environment';
       flex-direction: column;
       color: var(--color-white);
       position: relative;
+      overflow-x: hidden;
     }
 
     .hero-content {
@@ -38,6 +40,8 @@ import { environment } from '../../../environments/environment';
       align-items: center;
       text-align: center;
       padding: 2rem;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     .hero-title {
@@ -46,6 +50,7 @@ import { environment } from '../../../environments/environment';
       margin-bottom: 0.5rem;
       letter-spacing: 2px;
       text-transform: uppercase;
+      max-width: 100%;
     }
 
     .hero-subtitle {
@@ -56,8 +61,17 @@ import { environment } from '../../../environments/environment';
     }
 
     @media (max-width: 768px) {
+      .hero {
+        height: 80vh;
+      }
+      
+      .hero-content {
+        padding: 1.5rem;
+      }
+      
       .hero-title {
         font-size: 2rem;
+        letter-spacing: 1px;
       }
       
       .hero-subtitle {

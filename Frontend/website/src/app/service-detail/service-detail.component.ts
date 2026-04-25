@@ -45,12 +45,16 @@ import { Service } from '../shared/models/service.model';
       background-color: #D4D9C8;
       min-height: 100vh;
       padding: 80px 0;
+      width: 100%;
+      overflow-x: hidden;
     }
 
     .container {
       max-width: 1200px;
       margin: 0 auto;
       padding: 0 60px;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     .service-content {

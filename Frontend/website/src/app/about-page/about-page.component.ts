@@ -86,16 +86,22 @@ import { FooterComponent } from '../shared/components/footer/footer.component';
     .about-page {
       background-color: #DAE2CB;
       min-height: 100vh;
+      width: 100%;
+      overflow-x: hidden;
     }
 
     .section-padding {
       padding: 80px 0;
+      width: 100%;
+      overflow-x: hidden;
     }
 
     .container {
       max-width: 1400px;
       margin: 0 auto;
       padding: 0 40px;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     .section-title {
@@ -292,7 +298,7 @@ import { FooterComponent } from '../shared/components/footer/footer.component';
 
     @media (max-width: 768px) {
       .about-page {
-        padding-top: 60px;
+        padding-top: 0;
       }
 
       .section-padding {
@@ -304,7 +310,7 @@ import { FooterComponent } from '../shared/components/footer/footer.component';
       }
 
       .section-title {
-        font-size: 42px;
+        font-size: 36px;
         margin-bottom: 30px;
       }
 
@@ -314,26 +320,45 @@ import { FooterComponent } from '../shared/components/footer/footer.component';
 
       .founder-section {
         .founder-message-box {
-          padding: 30px;
+          padding: 30px 20px;
         }
 
         .founder-message {
-          font-size: 18px;
+          font-size: 16px;
           margin: 30px 0;
         }
 
         .quote-icon {
-          font-size: 60px;
+          font-size: 50px;
+        }
+        
+        .quote-top {
+          top: 10px;
+          left: 15px;
+        }
+        
+        .quote-bottom {
+          bottom: 10px;
+          right: 15px;
         }
       }
 
       .overview-section .overview-box {
-        padding: 25px;
+        padding: 20px;
+        border-width: 2px;
       }
 
       .about-section .section-image,
       .why-choose-section .section-image {
-        height: 300px;
+        height: 250px;
+        border-radius: 12px;
+      }
+      
+      .about-section .content-grid,
+      .why-choose-section .content-grid,
+      .founder-section .founder-grid,
+      .overview-section .overview-grid {
+        gap: 30px;
       }
     }
   `]

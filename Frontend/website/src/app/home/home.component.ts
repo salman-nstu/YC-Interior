@@ -48,6 +48,8 @@ import { ReviewsComponent } from './components/reviews/reviews.component';
   styles: [`
     :host {
       display: block;
+      width: 100%;
+      overflow-x: hidden;
     }
   `]
 })

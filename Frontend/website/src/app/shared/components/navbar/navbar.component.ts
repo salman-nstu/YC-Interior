@@ -27,16 +27,28 @@ import { filter } from 'rxjs/operators';
             </div>
           </a>
         </div>
-        <ul class="nav-links">
-          <li><a (click)="navigateToHome($event)" [class.active]="currentRoute === '/' && activeSection === 'home'">HOME</a></li>
-          <li><a routerLink="/about" [class.active]="currentRoute === '/about'">ABOUT</a></li>
-          <li><a routerLink="/services" [class.active]="currentRoute === '/services'">SERVICES</a></li>
-          <li><a routerLink="/projects" [class.active]="currentRoute === '/projects'">PROJECTS</a></li>
-          <li><a routerLink="/team" [class.active]="currentRoute === '/team'">TEAM</a></li>
-          <li><a routerLink="/blogs" [class.active]="currentRoute === '/blogs' || currentRoute.startsWith('/blogs/')">BLOGS</a></li>
-          <li><a routerLink="/contact" [class.active]="currentRoute === '/contact'">CONTACT</a></li>
+        
+        <!-- Hamburger Menu Button -->
+        <button class="hamburger" (click)="toggleMenu()" [class.active]="isMenuOpen">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        
+        <!-- Navigation Links -->
+        <ul class="nav-links" [class.mobile-open]="isMenuOpen">
+          <li><a (click)="navigateToHome($event); closeMenu()" [class.active]="currentRoute === '/' && activeSection === 'home'">HOME</a></li>
+          <li><a routerLink="/about" (click)="closeMenu()" [class.active]="currentRoute === '/about'">ABOUT</a></li>
+          <li><a routerLink="/services" (click)="closeMenu()" [class.active]="currentRoute === '/services'">SERVICES</a></li>
+          <li><a routerLink="/projects" (click)="closeMenu()" [class.active]="currentRoute === '/projects'">PROJECTS</a></li>
+          <li><a routerLink="/team" (click)="closeMenu()" [class.active]="currentRoute === '/team'">TEAM</a></li>
+          <li><a routerLink="/blogs" (click)="closeMenu()" [class.active]="currentRoute === '/blogs' || currentRoute.startsWith('/blogs/')">BLOGS</a></li>
+          <li><a routerLink="/contact" (click)="closeMenu()" [class.active]="currentRoute === '/contact'">CONTACT</a></li>
         </ul>
       </div>
+      
+      <!-- Mobile Menu Overlay -->
+      <div class="menu-overlay" [class.active]="isMenuOpen" (click)="closeMenu()"></div>
     </nav>
   `,
   styles: [`
@@ -53,6 +65,8 @@ import { filter } from 'rxjs/operators';
       max-width: 1400px;
       margin: 0 auto;
       padding: 0 60px;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     .nav-content {
@@ -64,6 +78,7 @@ import { filter } from 'rxjs/operators';
     .logo {
       display: flex;
       align-items: center;
+      z-index: 102;
       
       a {
         text-decoration: none;
@@ -88,6 +103,61 @@ import { filter } from 'rxjs/operators';
         svg {
           color: var(--color-primary-dark);
         }
+      }
+    }
+
+    /* Hamburger Menu */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      justify-content: space-around;
+      width: 30px;
+      height: 25px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      z-index: 102;
+      
+      span {
+        width: 100%;
+        height: 3px;
+        background-color: var(--color-primary-dark);
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        transform-origin: center;
+      }
+      
+      &.active {
+        span:nth-child(1) {
+          transform: rotate(45deg) translateY(10px);
+        }
+        
+        span:nth-child(2) {
+          opacity: 0;
+        }
+        
+        span:nth-child(3) {
+          transform: rotate(-45deg) translateY(-10px);
+        }
+      }
+    }
+
+    /* Menu Overlay */
+    .menu-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 99;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      
+      &.active {
+        opacity: 1;
       }
     }
 
@@ -141,8 +211,55 @@ import { filter } from 'rxjs/operators';
         padding: 0 20px;
       }
 
+      .hamburger {
+        display: flex;
+      }
+
+      .menu-overlay {
+        display: block;
+        
+        &:not(.active) {
+          pointer-events: none;
+        }
+      }
+
       .nav-links {
-        display: none;
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 280px;
+        height: 100vh;
+        background: #EAE8DC;
+        flex-direction: column;
+        justify-content: flex-start;
+        padding: 100px 30px 30px;
+        gap: 0;
+        box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+        transition: right 0.3s ease;
+        z-index: 101;
+        overflow-y: auto;
+        
+        &.mobile-open {
+          right: 0;
+        }
+        
+        li {
+          width: 100%;
+          padding: 0;
+          margin: 0;
+          
+          &::before {
+            display: none;
+          }
+          
+          a {
+            display: block;
+            width: 100%;
+            padding: 15px 0;
+            font-size: 1rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+          }
+        }
       }
     }
   `]
@@ -151,6 +268,7 @@ export class NavbarComponent implements OnInit {
   settings: ApplicationSettings | null = null;
   currentRoute: string = '/';
   activeSection: string = 'home';
+  isMenuOpen: boolean = false;
 
   constructor(
     private settingsService: SettingsService,
@@ -279,5 +397,20 @@ export class NavbarComponent implements OnInit {
         }
       }
     }
+  }
+
+  toggleMenu() {
+    this.isMenuOpen = !this.isMenuOpen;
+    // Prevent body scroll when menu is open
+    if (this.isMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+  }
+
+  closeMenu() {
+    this.isMenuOpen = false;
+    document.body.style.overflow = '';
   }
 }

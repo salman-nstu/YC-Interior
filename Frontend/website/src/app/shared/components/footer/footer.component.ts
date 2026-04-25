@@ -123,6 +123,16 @@ import { AboutSection } from '../../models/about.model';
       padding: var(--spacing-xl) 0 var(--spacing-md);
       background-color: #CFD0AE;
       position: relative;
+      width: 100%;
+      overflow-x: hidden;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 60px;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     .footer-grid {
@@ -133,6 +143,8 @@ import { AboutSection } from '../../models/about.model';
       position: relative;
       z-index: 1;
       padding-right: 320px;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     .footer-col {
@@ -330,6 +342,10 @@ import { AboutSection } from '../../models/about.model';
     }
 
     @media (max-width: 968px) {
+      .container {
+        padding: 0 40px;
+      }
+      
       .footer-grid {
         grid-template-columns: 1fr;
         gap: 2.5rem;
@@ -348,6 +364,10 @@ import { AboutSection } from '../../models/about.model';
     @media (max-width: 576px) {
       .footer {
         padding: var(--spacing-lg) 0 var(--spacing-sm);
+      }
+      
+      .container {
+        padding: 0 20px;
       }
       
       .footer-grid {
