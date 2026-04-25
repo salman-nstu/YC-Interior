@@ -171,7 +171,7 @@ import { GalleryImage } from '../../../shared/models/gallery.model';
            *ngIf="lightboxOpen" 
            (click)="closeLightbox()"
            [@fadeIn]>
-        <div class="lightbox-container" (click)="$event.stopPropagation()">
+        <div class="lightbox-container">
           <!-- Close Button -->
           <button class="lightbox-close" (click)="closeLightbox()">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -181,7 +181,7 @@ import { GalleryImage } from '../../../shared/models/gallery.model';
           </button>
 
           <!-- Image -->
-          <div class="lightbox-image-wrapper">
+          <div class="lightbox-image-wrapper" (click)="$event.stopPropagation()">
             <img 
               [src]="getImageUrl(images[currentImageIndex])" 
               [alt]="images[currentImageIndex]?.media?.altText || images[currentImageIndex]?.title || 'Gallery Image'"
@@ -338,7 +338,7 @@ import { GalleryImage } from '../../../shared/models/gallery.model';
     .gallery-center-title {
       grid-column: 3 / 5;
       grid-row: 2 / 3;
-      background-color: #1B4332;
+      background-color: #15503E;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -355,7 +355,7 @@ import { GalleryImage } from '../../../shared/models/gallery.model';
       text-align: center;
       margin: 0;
       letter-spacing: 2px;
-      font-family: 'Sofia Sans', sans-serif;
+      font-family: 'Ade Display', 'Georgia', serif;
     }
 
     /* Item 5: Right side (larger) */
@@ -381,7 +381,7 @@ import { GalleryImage } from '../../../shared/models/gallery.model';
     .gallery-cta {
       grid-column: 5 / 7;
       grid-row: 3 / 4;
-      background-color: #C8D4BA;
+      background-color: #CFD0AEB2;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -393,14 +393,14 @@ import { GalleryImage } from '../../../shared/models/gallery.model';
 
     .cta-text {
       font-size: 18px;
-      color: #1B4332;
+      color: #15503E;
       line-height: 1.6;
       margin-bottom: 25px;
       font-weight: 500;
     }
 
     .btn-explore-bottom {
-      background-color: #1B4332;
+      background-color: #15503E;
       color: #FFFFFF;
       border: none;
       padding: 12px 32px;
@@ -412,7 +412,7 @@ import { GalleryImage } from '../../../shared/models/gallery.model';
     }
 
     .btn-explore-bottom:hover {
-      background-color: #2D5A45;
+      background-color: #15503E;
       transform: translateY(-2px);
     }
 
@@ -421,7 +421,7 @@ import { GalleryImage } from '../../../shared/models/gallery.model';
       text-align: center;
       padding: 60px 20px;
       font-size: 18px;
-      color: #2D3E2E;
+      color: #15503E;
       min-height: 400px;
       display: flex;
       align-items: center;
@@ -535,6 +535,7 @@ import { GalleryImage } from '../../../shared/models/gallery.model';
       justify-content: center;
       padding: 40px;
       overflow: hidden;
+      cursor: pointer;
     }
 
     .lightbox-container {
@@ -554,6 +555,7 @@ import { GalleryImage } from '../../../shared/models/gallery.model';
       display: flex;
       align-items: center;
       justify-content: center;
+      cursor: default;
     }
 
     .lightbox-image {
@@ -798,12 +800,30 @@ export class GalleryComponent implements OnInit {
   openLightbox(index: number): void {
     this.currentImageIndex = index;
     this.lightboxOpen = true;
-    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    // Store current scroll position
+    const scrollY = window.scrollY;
+    // Prevent background scrolling - multiple approaches for cross-browser compatibility
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+    document.body.style.top = `-${scrollY}px`;
+    // Store scroll position as data attribute for restoration
+    document.body.setAttribute('data-scroll-y', scrollY.toString());
   }
 
   closeLightbox(): void {
     this.lightboxOpen = false;
-    document.body.style.overflow = ''; // Restore scrolling
+    // Restore scrolling and scroll position
+    const scrollY = document.body.getAttribute('data-scroll-y');
+    document.body.style.overflow = '';
+    document.body.style.position = '';
+    document.body.style.width = '';
+    document.body.style.top = '';
+    document.body.removeAttribute('data-scroll-y');
+    // Restore scroll position
+    if (scrollY) {
+      window.scrollTo(0, parseInt(scrollY, 10));
+    }
   }
 
   navigateToGallery(): void {

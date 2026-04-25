@@ -17,14 +17,15 @@ import { Service } from '../shared/models/service.model';
       <div class="container">
         <div *ngIf="!loading && service" class="service-content">
           <h1 class="service-title">{{ service.title }}</h1>
-          <div class="title-underline"></div>
           
-          <div class="service-image-wrapper">
-            <img [src]="service.coverMedia?.url" [alt]="service.title" class="service-image" />
-          </div>
-          
-          <div class="service-description">
-            <p>{{ service.description }}</p>
+          <div class="content-layout">
+            <div class="image-section">
+              <img [src]="service.coverMedia?.url" [alt]="service.title" class="service-image" />
+            </div>
+            
+            <div class="text-section">
+              <p>{{ service.description }}</p>
+            </div>
           </div>
         </div>
         
@@ -50,7 +51,7 @@ import { Service } from '../shared/models/service.model';
     }
 
     .container {
-      max-width: 1200px;
+      max-width: 1400px;
       margin: 0 auto;
       padding: 0 60px;
       width: 100%;
@@ -60,7 +61,7 @@ import { Service } from '../shared/models/service.model';
     .service-content {
       display: flex;
       flex-direction: column;
-      gap: 40px;
+      gap: 60px;
     }
 
     .service-title {
@@ -68,39 +69,33 @@ import { Service } from '../shared/models/service.model';
       font-size: 64px;
       font-weight: 400;
       color: #46563B;
-      text-align: center;
       margin: 0;
       letter-spacing: 2px;
       text-transform: uppercase;
     }
 
-    .title-underline {
-      width: 100%;
-      height: 2px;
-      background-color: #46563B;
-      margin: 0 auto;
+    .content-layout {
+      display: grid;
+      grid-template-columns: 1fr 1.5fr;
+      gap: 60px;
+      align-items: flex-start;
     }
 
-    .service-image-wrapper {
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      margin: 20px 0;
+    .image-section {
+      position: sticky;
+      top: 100px;
     }
 
     .service-image {
       width: 100%;
-      max-width: 900px;
       height: auto;
+      max-height: 500px;
       border-radius: 16px;
       box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
       object-fit: cover;
     }
 
-    .service-description {
-      max-width: 900px;
-      margin: 0 auto;
-      
+    .text-section {
       p {
         font-family: 'Sofia Sans', sans-serif;
         font-size: 18px;
@@ -129,7 +124,20 @@ import { Service } from '../shared/models/service.model';
         font-size: 48px;
       }
 
-      .service-description p {
+      .content-layout {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+
+      .image-section {
+        position: static;
+      }
+
+      .service-image {
+        max-height: 400px;
+      }
+
+      .text-section p {
         font-size: 16px;
       }
     }
@@ -144,14 +152,22 @@ import { Service } from '../shared/models/service.model';
       }
 
       .service-content {
-        gap: 30px;
+        gap: 40px;
       }
 
       .service-title {
         font-size: 36px;
       }
 
-      .service-description p {
+      .content-layout {
+        gap: 30px;
+      }
+
+      .service-image {
+        max-height: 300px;
+      }
+
+      .text-section p {
         font-size: 15px;
       }
     }

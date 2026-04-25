@@ -14,9 +14,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MiscService } from '../../core/services/misc.service';
 import { ReviewResponse } from '../../core/models/misc.model';
-import { MediaPickerComponent } from '../../shared/media-picker/media-picker.component';
 import { ConfirmDialogComponent } from '../../shared/confirm-dialog/confirm-dialog.component';
-import { MediaResponse } from '../../core/models/media.model';
 
 @Component({
   selector: 'app-reviews',
@@ -25,8 +23,7 @@ import { MediaResponse } from '../../core/models/media.model';
     CommonModule, ReactiveFormsModule,
     MatTableModule, MatButtonModule, MatIconModule,
     MatFormFieldModule, MatInputModule, MatSelectModule, MatCheckboxModule,
-    MatDialogModule, MatSnackBarModule, MatProgressSpinnerModule, MatPaginatorModule,
-    MediaPickerComponent
+    MatDialogModule, MatSnackBarModule, MatProgressSpinnerModule, MatPaginatorModule
   ],
   template: `
     <div class="page-header">

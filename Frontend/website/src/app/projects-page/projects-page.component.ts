@@ -22,9 +22,9 @@ import { ApiResponse, PageResponse } from '../shared/models/api.model';
           <div class="project-card" *ngFor="let project of projects" (click)="navigateToProject(project.id)">
             <div class="project-image">
               <img [src]="project.coverMedia?.url" [alt]="project.title" />
-              <div class="project-overlay">
-                <h3 class="project-title">{{ project.title }}</h3>
-              </div>
+            </div>
+            <div class="project-info">
+              <h3 class="project-title">{{ project.title }}</h3>
             </div>
           </div>
         </div>
@@ -103,11 +103,12 @@ import { ApiResponse, PageResponse } from '../shared/models/api.model';
     }
 
     .project-card {
-      background-color: #D4D9C8;
-      border-radius: 12px;
+      background-color: transparent;
+      border-radius: 24px;
       overflow: hidden;
       transition: transform 0.3s ease, box-shadow 0.3s ease;
       cursor: pointer;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
       
       &:hover {
         transform: translateY(-8px);
@@ -133,29 +134,19 @@ import { ApiResponse, PageResponse } from '../shared/models/api.model';
       transform: scale(1.05);
     }
 
-    .project-overlay {
-      position: absolute;
-      inset: 0;
-      background: rgba(70, 86, 59, 0.85);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    .project-card:hover .project-overlay {
-      opacity: 1;
+    .project-info {
+      background-color: white;
+      padding: 20px;
+      text-align: center;
     }
 
     .project-title {
       font-family: 'Sofia Sans', sans-serif;
-      font-size: 24px;
+      font-size: 18px;
       font-weight: 600;
-      color: white;
+      color: #2C3E2F;
       margin: 0;
-      text-align: center;
-      padding: 0 20px;
+      line-height: 1.3;
     }
 
     /* Pagination Styles */
@@ -245,6 +236,10 @@ import { ApiResponse, PageResponse } from '../shared/models/api.model';
       .page-title {
         font-size: 64px;
       }
+
+      .project-title {
+        font-size: 16px;
+      }
     }
 
     @media (max-width: 576px) {
@@ -264,6 +259,14 @@ import { ApiResponse, PageResponse } from '../shared/models/api.model';
       .page-title {
         font-size: 48px;
         margin-bottom: 40px;
+      }
+
+      .project-info {
+        padding: 16px;
+      }
+
+      .project-title {
+        font-size: 15px;
       }
 
       .pagination {

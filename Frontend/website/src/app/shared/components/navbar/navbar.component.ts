@@ -170,7 +170,7 @@ import { filter } from 'rxjs/operators';
       padding: 0;
       
       a {
-        font-size: 0.9rem;
+        font-size: 1.1rem;
         font-weight: 500;
         letter-spacing: 0.5px;
         color: var(--color-text-dark);
@@ -256,7 +256,7 @@ import { filter } from 'rxjs/operators';
             display: block;
             width: 100%;
             padding: 15px 0;
-            font-size: 1rem;
+            font-size: 1.2rem;
             border-bottom: 1px solid rgba(0, 0, 0, 0.1);
           }
         }

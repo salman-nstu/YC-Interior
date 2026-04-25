@@ -49,12 +49,12 @@ import { FooterComponent } from '../shared/components/footer/footer.component';
       <!-- Section 3: Why Choose Us -->
       <section class="why-choose-section section-padding">
         <div class="container">
-          <h2 class="section-title centered">WHY CHOOSE US?</h2>
           <div class="content-grid">
             <div class="image-content">
               <img src="/yc-assets/yy.jpg" alt="Why Choose Us" class="section-image" />
             </div>
             <div class="text-content">
+              <h2 class="section-title">WHY CHOOSE US?</h2>
               <p class="description" *ngIf="whyChooseUs">{{ whyChooseUs.description }}</p>
               <p class="description" *ngIf="!whyChooseUs && !loading">Loading information...</p>
             </div>
@@ -209,7 +209,7 @@ import { FooterComponent } from '../shared/components/footer/footer.component';
         display: grid;
         grid-template-columns: 1fr 1.5fr;
         gap: 80px;
-        align-items: center;
+        align-items: flex-start;
       }
 
       .image-content {
@@ -224,6 +224,10 @@ import { FooterComponent } from '../shared/components/footer/footer.component';
 
       .text-content {
         padding-left: 40px;
+        
+        .section-title {
+          margin-bottom: 30px;
+        }
       }
     }
 

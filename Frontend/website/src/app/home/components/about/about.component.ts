@@ -79,7 +79,7 @@ import { AboutSection } from '../../../shared/models/about.model';
     }
 
     .section-title {
-      font-family: 'Playfair Display', serif;
+      font-family: 'Ade Display', serif;
       font-size: 5rem;
       color: #ffffff;
       font-weight: 400;
@@ -107,6 +107,7 @@ import { AboutSection } from '../../../shared/models/about.model';
     }
 
     .about-text p {
+      font-family: 'Sofia Sans', sans-serif;
       font-size: 1.05rem;
       line-height: 1.9;
       color: #ffffff;

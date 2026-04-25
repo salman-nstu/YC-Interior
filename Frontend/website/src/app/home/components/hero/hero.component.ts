@@ -45,7 +45,8 @@ import { environment } from '../../../environments/environment';
     }
 
     .hero-title {
-      font-size: 4rem;
+      font-family: 'Circular Std', sans-serif;
+      font-size: 5rem;
       font-weight: 400;
       margin-bottom: 0.5rem;
       letter-spacing: 2px;
@@ -54,7 +55,8 @@ import { environment } from '../../../environments/environment';
     }
 
     .hero-subtitle {
-      font-size: 1.25rem;
+      font-family: 'Sofia Sans', sans-serif;
+      font-size: 2rem;
       margin-bottom: 2rem;
       font-weight: 300;
       letter-spacing: 1px;

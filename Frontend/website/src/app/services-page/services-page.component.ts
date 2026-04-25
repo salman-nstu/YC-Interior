@@ -99,7 +99,7 @@ import { Service } from '../shared/models/service.model';
     .service-overlay {
       position: absolute;
       inset: 0;
-      background: linear-gradient(to bottom, rgba(70, 86, 59, 0.3) 0%, rgba(70, 86, 59, 0.85) 100%);
+      background: linear-gradient(to bottom, rgba(70, 86, 59, 0) 0%, rgba(70, 86, 59, 0) 40%, rgba(70, 86, 59, 0.85) 100%);
       display: flex;
       flex-direction: column;
       justify-content: flex-end;

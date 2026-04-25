@@ -29,7 +29,7 @@ public class ProjectController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         return ResponseEntity.ok(ApiResponse.ok(PageResponse.from(service.getAll(keyword, status, categoryType, featured,
-                PageRequest.of(page, size, Sort.by("createdAt").descending())))));
+                PageRequest.of(page, size, Sort.by(Sort.Order.asc("displayOrder"), Sort.Order.desc("createdAt")))))));
     }
 
     @GetMapping("/{id}")
@@ -59,7 +59,7 @@ public class ProjectController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "4") int size) {
         return ResponseEntity.ok(ApiResponse.ok(PageResponse.from(service.getAll(null, "published", null, true,
-                PageRequest.of(page, size, Sort.by("displayOrder").ascending().and(Sort.by("createdAt").descending()))))));
+                PageRequest.of(page, size, Sort.by(Sort.Order.asc("displayOrder"), Sort.Order.desc("createdAt")))))));
     }
 
     @PatchMapping("/{id}/featured")
