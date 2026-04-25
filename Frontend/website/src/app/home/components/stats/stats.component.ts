@@ -256,11 +256,6 @@ gsap.registerPlugin(ScrollTrigger);
       .stat-label {
         font-size: 15px;
       }
-
-      .overlay {
-        bottom: 30px;
-        left: 25px;
-      }
     }
 
     @media (max-width: 768px) {
@@ -290,6 +285,12 @@ gsap.registerPlugin(ScrollTrigger);
 
       .stat-label {
         font-size: 14px;
+      }
+      
+      .overlay {
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
       }
     }
 
@@ -321,8 +322,9 @@ gsap.registerPlugin(ScrollTrigger);
       }
 
       .overlay {
-        bottom: 25px;
-        left: 20px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
       }
     }
   `]

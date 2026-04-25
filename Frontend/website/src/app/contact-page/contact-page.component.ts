@@ -68,9 +68,9 @@ import { ApplicationSettings } from '../shared/models/settings.model';
             </div>
             
             <!-- Map -->
-            <div class="map-container" *ngIf="settings?.mapEmbedUrl">
+            <div class="map-container" *ngIf="safeMapUrl">
               <iframe 
-                [src]="getSafeMapUrl()" 
+                [src]="safeMapUrl" 
                 width="100%" 
                 height="300" 
                 style="border:0; border-radius: 12px;" 
@@ -201,12 +201,16 @@ import { ApplicationSettings } from '../shared/models/settings.model';
       background-color: #D4D9C8;
       min-height: 100vh;
       padding: 80px 0;
+      width: 100%;
+      overflow-x: hidden;
     }
 
     .container {
       max-width: 1400px;
       margin: 0 auto;
       padding: 0 60px;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     .contact-grid {
@@ -484,6 +488,7 @@ export class ContactPageComponent implements OnInit {
   submitting = false;
   submitSuccess = false;
   submitError: string | null = null;
+  safeMapUrl: SafeResourceUrl | null = null;
 
   constructor(
     private settingsService: SettingsService,
@@ -511,6 +516,7 @@ export class ContactPageComponent implements OnInit {
       next: (response) => {
         if (response.success && response.data) {
           this.settings = response.data;
+          this.safeMapUrl = this.getSafeMapUrl();
           this.cdr.detectChanges();
         }
       },
@@ -522,7 +528,19 @@ export class ContactPageComponent implements OnInit {
 
   getSafeMapUrl(): SafeResourceUrl {
     if (this.settings?.mapEmbedUrl) {
-      return this.sanitizer.bypassSecurityTrustResourceUrl(this.settings.mapEmbedUrl);
+      // Extract URL from iframe HTML if full iframe tag is provided
+      let url = this.settings.mapEmbedUrl;
+      
+      // Check if it's a full iframe HTML
+      if (url.includes('<iframe')) {
+        // Extract src attribute from iframe
+        const srcMatch = url.match(/src=["']([^"']+)["']/);
+        if (srcMatch && srcMatch[1]) {
+          url = srcMatch[1];
+        }
+      }
+      
+      return this.sanitizer.bypassSecurityTrustResourceUrl(url);
     }
     return '';
   }

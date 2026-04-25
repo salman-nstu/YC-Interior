@@ -43,12 +43,16 @@
   --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.15);
 }
 
-body {
+html, body {
   font-family: var(--font-body);
   color: var(--color-text-dark);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  width: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -81,10 +85,14 @@ button {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 var(--spacing-md);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .section {
   padding: var(--spacing-xl) 0;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 .section-title {

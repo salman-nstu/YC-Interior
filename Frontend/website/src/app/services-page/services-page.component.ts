@@ -46,12 +46,16 @@ import { Service } from '../shared/models/service.model';
       background-color: #D4D9C8;
       min-height: 100vh;
       padding: 80px 0;
+      width: 100%;
+      overflow-x: hidden;
     }
 
     .container {
       max-width: 1400px;
       margin: 0 auto;
       padding: 0 60px;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     .page-title {
@@ -168,7 +172,7 @@ import { Service } from '../shared/models/service.model';
 
     @media (max-width: 768px) {
       .services-page {
-        padding: 60px 0;
+        padding: 40px 0;
       }
 
       .container {
@@ -181,19 +185,26 @@ import { Service } from '../shared/models/service.model';
       }
 
       .page-title {
-        font-size: 42px;
+        font-size: 36px;
         margin-bottom: 40px;
       }
 
       .service-overlay {
-        padding: 30px;
+        padding: 24px;
       }
 
       .service-title {
-        font-size: 24px;
+        font-size: 22px;
+        margin-bottom: 12px;
       }
 
       .service-description {
+        font-size: 14px;
+        margin-bottom: 20px;
+      }
+      
+      .btn-learn-more {
+        padding: 10px 24px;
         font-size: 14px;
       }
     }
