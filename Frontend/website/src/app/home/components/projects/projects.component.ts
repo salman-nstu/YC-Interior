@@ -57,7 +57,7 @@ import { environment } from '../../../environments/environment';
     }
 
     .section-title {
-      font-family: 'Ade', serif;
+      font-family: 'Ade display', serif;
       font-size: 96px;
       font-weight: 400;
       font-style: normal;
@@ -125,7 +125,7 @@ import { environment } from '../../../environments/environment';
       font-style: normal;
       line-height: 100%;
       letter-spacing: 0%;
-      color: #2d2d2d;
+      color: #000000ff;
       padding: 0.5rem;
     }
 
@@ -148,7 +148,7 @@ import { environment } from '../../../environments/environment';
       text-transform: lowercase;
       
       &:hover {
-        background-color: #0d3a2a;
+        background-color: #144F3C;
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(20, 79, 60, 0.3);
       }
@@ -211,8 +211,19 @@ export class ProjectsComponent implements OnInit {
         console.log('API Response:', response);
         this.loading = false;
         if (response.success && response.data?.content) {
-          this.displayProjects = [...response.data.content.slice(0, 4)];
-          console.log('Display projects set to:', this.displayProjects);
+          console.log('Projects before sorting:', response.data.content.map(p => ({ title: p.title, displayOrder: p.displayOrder })));
+          
+          // Sort by displayOrder in ascending order (0, 1, 2, 3...)
+          const sortedProjects = [...response.data.content].sort((a, b) => {
+            const orderA = a.displayOrder ?? 999;
+            const orderB = b.displayOrder ?? 999;
+            return orderA - orderB;
+          });
+          
+          console.log('Projects after sorting:', sortedProjects.map(p => ({ title: p.title, displayOrder: p.displayOrder })));
+          
+          this.displayProjects = sortedProjects.slice(0, 4);
+          console.log('Display projects set to:', this.displayProjects.map(p => ({ title: p.title, displayOrder: p.displayOrder })));
           console.log('Display projects length:', this.displayProjects.length);
           this.cdr.detectChanges();
         }

@@ -1,5 +1,8 @@
 /* You can add global styles to this file, and also import other style files */
 
+/* Import Custom Fonts */
+@import 'assets/fonts/fonts.css';
+
 /* CSS Reset & Base Styles */
 * {
   margin: 0;
@@ -22,8 +25,8 @@
   --color-white: #ffffff;
   
   /* Typography - Exact Figma Match */
-  --font-title: 'Cormorant Garamond', serif;  /* Closest to Ade Display */
-  --font-body: 'Sofia Sans', sans-serif;      /* Exact match */
+  --font-title: 'Ade Display', 'Cormorant Garamond', serif;
+  --font-body: 'Sofia Sans', sans-serif;
   
   /* Spacing */
   --spacing-xs: 0.5rem;

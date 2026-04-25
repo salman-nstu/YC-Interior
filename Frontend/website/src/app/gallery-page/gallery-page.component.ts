@@ -64,7 +64,7 @@ import { ApiResponse, PageResponse } from '../shared/models/api.model';
     
     <!-- Lightbox Modal -->
     <div class="lightbox-overlay" *ngIf="lightboxOpen" (click)="closeLightbox()">
-      <div class="lightbox-container" (click)="$event.stopPropagation()">
+      <div class="lightbox-container">
         <button class="lightbox-close" (click)="closeLightbox()">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -72,7 +72,7 @@ import { ApiResponse, PageResponse } from '../shared/models/api.model';
           </svg>
         </button>
         
-        <div class="lightbox-image-wrapper">
+        <div class="lightbox-image-wrapper" (click)="$event.stopPropagation()">
           <img 
             [src]="selectedImage?.media?.url" 
             [alt]="selectedImage?.media?.altText || selectedImage?.title"
@@ -235,6 +235,7 @@ import { ApiResponse, PageResponse } from '../shared/models/api.model';
       justify-content: center;
       padding: 40px;
       overflow: hidden;
+      cursor: pointer;
     }
 
     .lightbox-container {
@@ -254,6 +255,7 @@ import { ApiResponse, PageResponse } from '../shared/models/api.model';
       display: flex;
       align-items: center;
       justify-content: center;
+      cursor: default;
     }
 
     .lightbox-image {
@@ -429,12 +431,30 @@ export class GalleryPageComponent implements OnInit {
   openLightbox(image: GalleryImage) {
     this.selectedImage = image;
     this.lightboxOpen = true;
+    // Store current scroll position
+    const scrollY = window.scrollY;
+    // Prevent background scrolling - multiple approaches for cross-browser compatibility
     document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+    document.body.style.top = `-${scrollY}px`;
+    // Store scroll position as data attribute for restoration
+    document.body.setAttribute('data-scroll-y', scrollY.toString());
   }
 
   closeLightbox() {
     this.lightboxOpen = false;
     this.selectedImage = null;
+    // Restore scrolling and scroll position
+    const scrollY = document.body.getAttribute('data-scroll-y');
     document.body.style.overflow = '';
+    document.body.style.position = '';
+    document.body.style.width = '';
+    document.body.style.top = '';
+    document.body.removeAttribute('data-scroll-y');
+    // Restore scroll position
+    if (scrollY) {
+      window.scrollTo(0, parseInt(scrollY, 10));
+    }
   }
 }

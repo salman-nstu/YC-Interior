@@ -61,8 +61,8 @@ import { environment } from '../../../environments/environment';
 
     .section-title {
       text-align: center;
-      font-family: 'Playfair Display', serif;
-      font-size: 3.5rem;
+      font-family: 'Ade display', serif;
+      font-size: 4.5rem;
       margin-bottom: 60px;
       color: #2d6a4f;
       font-weight: 400;
@@ -145,8 +145,9 @@ import { environment } from '../../../environments/environment';
     .service-title {
       padding: 12px 8px;
       text-align: center;
-      font-size: 0.75rem;
-      color: #144F3C;
+      font-family: 'Sofia Sans', sans-serif;
+      font-size: 1rem;
+      color: #084734F2;
       text-transform: uppercase;
       letter-spacing: 0.5px;
       font-weight: 600;
