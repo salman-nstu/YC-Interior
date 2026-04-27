@@ -104,12 +104,12 @@ import { ApiResponse, PageResponse } from '../shared/models/api.model';
     }
 
     .blog-card {
-      background: white;
+      background: #CFD0AE;
       border-radius: 20px;
       overflow: hidden;
       cursor: pointer;
       transition: transform 0.3s ease, box-shadow 0.3s ease;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
       
       &:hover {
         transform: translateY(-8px);

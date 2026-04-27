@@ -16,15 +16,9 @@ import { Project } from '../shared/models/project.model';
     <div class="project-detail-page">
       <div class="container">
         <div *ngIf="!loading && project" class="project-content">
-          <!-- Masonry Grid Layout -->
-          <div class="masonry-grid">
-            <!-- First Card: Cover Photo -->
-            <div class="grid-item cover-item" (click)="openLightbox(project.coverMedia?.url || '')">
-              <img [src]="project.coverMedia?.url" [alt]="project.title" />
-            </div>
-            
-            <!-- Second Card: Project Info -->
-            <div class="grid-item info-item">
+          <!-- Top Section: Info and Cover Image -->
+          <div class="project-header">
+            <div class="project-info">
               <h1 class="project-title">{{ project.title }}</h1>
               
               <div class="project-meta">
@@ -42,9 +36,17 @@ import { Project } from '../shared/models/project.model';
               </div>
             </div>
             
-            <!-- Additional Images -->
-            <div class="grid-item image-item" *ngFor="let image of project.images" (click)="openLightbox(image.url)">
-              <img [src]="image.url" [alt]="image.altText || project.title" />
+            <div class="project-cover">
+              <img [src]="project.coverMedia?.url" [alt]="project.title" (click)="openLightbox(project.coverMedia?.url || '')" />
+            </div>
+          </div>
+          
+          <!-- Additional Images Grid -->
+          <div class="additional-images" *ngIf="project.images && project.images.length > 0">
+            <div class="images-grid">
+              <div class="image-card" *ngFor="let image of project.images" (click)="openLightbox(image.url)">
+                <img [src]="image.url" [alt]="image.altText || project.title" />
+              </div>
             </div>
           </div>
         </div>
@@ -75,7 +77,7 @@ import { Project } from '../shared/models/project.model';
   `,
   styles: [`
     .project-detail-page {
-      background-color: #E8E4D9;
+      background-color: #D4D9C8;
       min-height: 100vh;
       padding: 80px 0;
       width: 100%;
@@ -91,59 +93,28 @@ import { Project } from '../shared/models/project.model';
     }
 
     .project-content {
-      width: 100%;
-    }
-
-    /* Masonry Grid Layout - Fixed Size Boxes */
-    .masonry-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 24px;
-      grid-auto-rows: 280px;
-    }
-
-    .grid-item {
-      border-radius: 24px;
-      overflow: hidden;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      cursor: pointer;
-      height: 280px;
-      
-      &:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-      }
-    }
-
-    /* Cover Photo - Fixed size */
-    .cover-item {
-      img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      }
-    }
-
-    /* Info Card - Not clickable */
-    .info-item {
-      background-color: #B8C5A8;
-      padding: 32px;
       display: flex;
       flex-direction: column;
-      gap: 16px;
-      overflow-y: auto;
-      cursor: default;
-      
-      &:hover {
-        transform: none;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-      }
+      gap: 80px;
+    }
+
+    /* Header Section */
+    .project-header {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: start;
+    }
+
+    .project-info {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
     }
 
     .project-title {
       font-family: 'Ade', serif;
-      font-size: 28px;
+      font-size: 48px;
       font-weight: 400;
       color: #2C3E2F;
       margin: 0;
@@ -152,8 +123,9 @@ import { Project } from '../shared/models/project.model';
 
     .project-meta {
       display: flex;
-      flex-direction: column;
-      gap: 8px;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
     }
 
     .meta-item {
@@ -172,21 +144,28 @@ import { Project } from '../shared/models/project.model';
     }
 
     .project-description {
-      margin-top: 8px;
+      margin-top: 20px;
+      padding-left: 20px;
+      border-left: 4px solid #B8C5A8;
       
       p {
         font-family: 'Sofia Sans', sans-serif;
-        font-size: 14px;
-        line-height: 1.6;
-        color: #2C3E2F;
+        font-size: 17px;
+        line-height: 1.8;
+        color: #2d2d2d;
         margin: 0;
         white-space: pre-wrap;
       }
     }
 
-    /* Additional Images - Fixed sizes */
-    .image-item {
-      height: 280px;
+    .project-cover {
+      width: 100%;
+      height: 100%;
+      min-height: 400px;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+      cursor: pointer;
       
       img {
         width: 100%;
@@ -197,6 +176,42 @@ import { Project } from '../shared/models/project.model';
       
       &:hover img {
         transform: scale(1.05);
+      }
+    }
+
+    /* Additional Images Section */
+    .additional-images {
+      margin-top: 20px;
+    }
+
+    .images-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .image-card {
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      aspect-ratio: 4/3;
+      
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+      }
+      
+      &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        
+        img {
+          transform: scale(1.05);
+        }
       }
     }
 
@@ -275,26 +290,18 @@ import { Project } from '../shared/models/project.model';
         padding: 0 40px;
       }
 
-      .masonry-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 20px;
-        grid-auto-rows: 250px;
-      }
-
-      .grid-item {
-        height: 250px;
-      }
-
-      .info-item {
-        padding: 24px;
+      .project-header {
+        grid-template-columns: 1fr;
+        gap: 40px;
       }
 
       .project-title {
-        font-size: 24px;
+        font-size: 40px;
       }
 
-      .image-item {
-        height: 250px;
+      .images-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
       }
     }
 
@@ -307,34 +314,25 @@ import { Project } from '../shared/models/project.model';
         padding: 0 20px;
       }
 
-      .masonry-grid {
-        grid-template-columns: 1fr;
-        gap: 16px;
-        grid-auto-rows: 220px;
-      }
-
-      .grid-item {
-        height: 220px;
-      }
-
-      .info-item {
-        padding: 20px;
+      .project-content {
+        gap: 60px;
       }
 
       .project-title {
-        font-size: 22px;
-      }
-
-      .meta-item {
-        font-size: 13px;
+        font-size: 32px;
       }
 
       .project-description p {
-        font-size: 13px;
+        font-size: 15px;
       }
 
-      .image-item {
-        height: 220px;
+      .project-cover {
+        min-height: 300px;
+      }
+
+      .images-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
       }
 
       .close-btn {

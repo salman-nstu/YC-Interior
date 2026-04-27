@@ -135,7 +135,7 @@ import { ApiResponse, PageResponse } from '../shared/models/api.model';
     }
 
     .project-info {
-      background-color: white;
+      background-color: #CFD0AE;
       padding: 20px;
       text-align: center;
     }
