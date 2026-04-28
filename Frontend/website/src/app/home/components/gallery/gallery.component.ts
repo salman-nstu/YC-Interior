@@ -1,8 +1,9 @@
-import { Component, OnInit, ChangeDetectorRef, HostListener } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ChangeDetectorRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { GalleryService } from '../../../shared/services/gallery.service';
+import { AnimationsService } from '../../../shared/services/animations.service';
 import { GalleryImage } from '../../../shared/models/gallery.model';
 
 @Component({
@@ -609,7 +610,7 @@ import { GalleryImage } from '../../../shared/models/gallery.model';
     }
   `]
 })
-export class GalleryComponent implements OnInit {
+export class GalleryComponent implements OnInit, AfterViewInit {
   images: GalleryImage[] = [];
   loading = false;
   loadedCount = 0;
@@ -620,6 +621,7 @@ export class GalleryComponent implements OnInit {
 
   constructor(
     private galleryService: GalleryService,
+    private animationsService: AnimationsService,
     private cdr: ChangeDetectorRef,
     private router: Router
   ) {}
@@ -636,6 +638,13 @@ export class GalleryComponent implements OnInit {
 
   ngOnInit() {
     this.loadGalleryImages();
+  }
+
+  ngAfterViewInit() {
+    // Initialize premium gallery animations while preserving all existing functionality
+    setTimeout(() => {
+      this.animationsService.initGalleryAnimation();
+    }, 100);
   }
 
   loadGalleryImages() {

@@ -1,7 +1,8 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ServiceService } from '../../../shared/services/service.service';
+import { AnimationsService } from '../../../shared/services/animations.service';
 import { Service } from '../../../shared/models/service.model';
 import { environment } from '../../../environments/environment';
 
@@ -91,6 +92,30 @@ import { environment } from '../../../environments/environment';
       display: flex;
       flex-direction: column;
       padding: 8px;
+    }
+
+    .service-card:nth-child(1) {
+      transform: translateY(-20px);
+    }
+
+    .service-card:nth-child(2) {
+      transform: translateY(40px);
+    }
+
+    .service-card:nth-child(3) {
+      transform: translateY(-20px);
+    }
+
+    .service-card:nth-child(4) {
+      transform: translateY(40px);
+    }
+
+    .service-card:nth-child(5) {
+      transform: translateY(-20px);
+    }
+
+    .service-card:nth-child(6) {
+      transform: translateY(40px);
     }
 
     .service-card:nth-child(1) {
@@ -244,19 +269,27 @@ import { environment } from '../../../environments/environment';
     }
   `]
 })
-export class ServicesComponent implements OnInit {
+export class ServicesComponent implements OnInit, AfterViewInit {
   services: Service[] = [];
   loading = true;
   environment = environment;
 
   constructor(
     private serviceService: ServiceService,
+    private animationsService: AnimationsService,
     private cdr: ChangeDetectorRef,
     private router: Router
   ) {}
 
   ngOnInit() {
     this.loadServices();
+  }
+
+  ngAfterViewInit() {
+    // Initialize services animations after view is ready
+    setTimeout(() => {
+      this.animationsService.initServicesAnimation();
+    }, 100);
   }
 
   navigateToServices() {

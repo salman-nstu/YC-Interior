@@ -1,6 +1,7 @@
 import { Component, OnInit, AfterViewInit, ChangeDetectorRef, ElementRef, QueryList, ViewChildren } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { StatisticService } from '../../../shared/services/statistic.service';
+import { AnimationsService } from '../../../shared/services/animations.service';
 import { Statistic } from '../../../shared/models/statistic.model';
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
@@ -345,6 +346,7 @@ export class StatsComponent implements OnInit, AfterViewInit {
 
   constructor(
     private statisticService: StatisticService,
+    private animationsService: AnimationsService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -353,7 +355,11 @@ export class StatsComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    // Animations will be triggered after data loads
+    // Initialize stats animations after view is ready
+    setTimeout(() => {
+      this.animationsService.initStatsAnimation();
+      this.animateCounters();
+    }, 100);
   }
 
   loadStatistics() {
