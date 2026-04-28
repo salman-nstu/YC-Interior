@@ -70,34 +70,39 @@ import { ApiResponse, PageResponse } from '../shared/models/api.model';
 
     .team-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 40px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
     }
 
     .team-card {
+      background-color: transparent;
+      border-radius: 24px;
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
       display: flex;
       flex-direction: column;
-      transition: transform 0.3s ease;
       
       &:hover {
         transform: translateY(-8px);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
       }
     }
 
     .member-image {
       width: 100%;
-      aspect-ratio: 3/4;
-      border-radius: 16px;
+      aspect-ratio: 1;
+      border-radius: 50%;
       overflow: hidden;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-      margin-bottom: 20px;
+      margin: 20px auto;
       background-color: #e5e5e5;
+      max-width: 200px;
       
       img {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        transition: transform 0.4s ease;
+        transition: transform 0.3s ease;
       }
     }
 
@@ -106,21 +111,24 @@ import { ApiResponse, PageResponse } from '../shared/models/api.model';
     }
 
     .member-info {
+      background-color: #CFD0AE;
+      padding: 20px;
       text-align: center;
-      padding: 0 10px;
+      margin-top: auto;
     }
 
     .member-name {
       font-family: 'Sofia Sans', sans-serif;
-      font-size: 24px;
+      font-size: 18px;
       font-weight: 600;
       color: #2C3E2F;
       margin: 0 0 8px 0;
+      line-height: 1.3;
     }
 
     .member-designation {
       font-family: 'Sofia Sans', sans-serif;
-      font-size: 16px;
+      font-size: 14px;
       font-weight: 400;
       color: #5A6B5C;
       margin: 0;
@@ -135,22 +143,36 @@ import { ApiResponse, PageResponse } from '../shared/models/api.model';
     }
 
     /* Responsive Design */
-    @media (max-width: 1024px) {
+    @media (max-width: 1200px) {
+      .team-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 968px) {
       .container {
         padding: 0 40px;
       }
 
       .team-grid {
         grid-template-columns: repeat(2, 1fr);
-        gap: 30px;
+        gap: 20px;
       }
 
       .page-title {
         font-size: 64px;
       }
+
+      .member-name {
+        font-size: 16px;
+      }
+
+      .member-designation {
+        font-size: 13px;
+      }
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 576px) {
       .team-page {
         padding: 60px 0;
       }
@@ -161,7 +183,7 @@ import { ApiResponse, PageResponse } from '../shared/models/api.model';
 
       .team-grid {
         grid-template-columns: 1fr;
-        gap: 40px;
+        gap: 16px;
       }
 
       .page-title {
@@ -169,12 +191,16 @@ import { ApiResponse, PageResponse } from '../shared/models/api.model';
         margin-bottom: 40px;
       }
 
+      .member-info {
+        padding: 16px;
+      }
+
       .member-name {
-        font-size: 22px;
+        font-size: 15px;
       }
 
       .member-designation {
-        font-size: 15px;
+        font-size: 12px;
       }
     }
   `]

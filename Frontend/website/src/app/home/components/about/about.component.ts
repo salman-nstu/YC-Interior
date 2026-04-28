@@ -1,8 +1,10 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AboutService } from '../../../shared/services/about.service';
+import { AnimationsService } from '../../../shared/services/animations.service';
 import { AboutSection } from '../../../shared/models/about.model';
+import { gsap } from 'gsap';
 
 @Component({
   selector: 'app-about',
@@ -13,7 +15,10 @@ import { AboutSection } from '../../../shared/models/about.model';
       <div class="overlay"></div>
       <div class="container">
         <div class="about-content">
-          <h2 class="section-title">ABOUT US</h2>
+          <h2 class="section-title typing-title">
+            <span class="typing-text"></span>
+            <span class="typing-cursor">|</span>
+          </h2>
           
           <div class="about-text-wrapper">
             <ng-container *ngIf="!loading && aboutSection && aboutSection.description">
@@ -86,6 +91,25 @@ import { AboutSection } from '../../../shared/models/about.model';
       letter-spacing: 0.02em;
       margin: 0;
       text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .typing-text {
+      display: inline-block;
+    }
+
+    .typing-cursor {
+      display: inline-block;
+      animation: blink 0.7s infinite;
+      font-weight: 300;
+      opacity: 1;
+    }
+
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
     }
 
     .about-text-wrapper {
@@ -154,6 +178,7 @@ import { AboutSection } from '../../../shared/models/about.model';
       .section-title {
         font-size: 3rem;
         text-align: center;
+        justify-content: center;
       }
 
       .about-text {
@@ -174,19 +199,70 @@ import { AboutSection } from '../../../shared/models/about.model';
     }
   `]
 })
-export class AboutComponent implements OnInit {
+export class AboutComponent implements OnInit, AfterViewInit {
   aboutSection: AboutSection | null = null;
   loading = true;
   error: string | null = null;
 
   constructor(
     private aboutService: AboutService,
+    private animationsService: AnimationsService,
     private cdr: ChangeDetectorRef,
     private router: Router
   ) {}
 
   ngOnInit() {
     this.loadAbout();
+  }
+
+  ngAfterViewInit() {
+    // Initialize typing animation when section comes into view
+    setTimeout(() => {
+      this.initTypingAnimation();
+      this.animationsService.initAboutAnimation();
+    }, 100);
+  }
+
+  initTypingAnimation() {
+    const text = "ABOUT US";
+    const typingElement = document.querySelector('.typing-text');
+    const cursorElement = document.querySelector('.typing-cursor');
+    
+    if (!typingElement) return;
+
+    // Start with empty text
+    typingElement.textContent = '';
+    
+    // Create typing animation with ScrollTrigger
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: '.about-section',
+        start: 'top 70%',
+        once: true
+      }
+    });
+
+    // Type each letter one by one
+    text.split('').forEach((char, index) => {
+      tl.to(typingElement, {
+        duration: 0.1,
+        onStart: () => {
+          typingElement.textContent += char;
+        }
+      });
+    });
+
+    // Hide cursor after typing is complete
+    tl.to(cursorElement, {
+      opacity: 0,
+      duration: 0.3,
+      delay: 0.5,
+      onComplete: () => {
+        if (cursorElement) {
+          (cursorElement as HTMLElement).style.display = 'none';
+        }
+      }
+    });
   }
 
   navigateToAbout() {
