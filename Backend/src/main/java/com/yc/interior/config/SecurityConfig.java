@@ -77,10 +77,12 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        // Allow all localhost origins in development
+        // LOCAL: Allow all localhost origins in development
+        // PRODUCTION: Update with your Vercel frontend URL
         config.setAllowedOriginPatterns(List.of(
-            "http://localhost:*",
-            "https://admin.yc-interior.com" // Add your production domain
+            "http://localhost:*",                           // LOCAL: Development
+            "https://*.vercel.app",                         // PRODUCTION: Vercel frontend
+            "https://admin.yc-interior.com"                 // PRODUCTION: Admin domain
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         config.setAllowedHeaders(List.of(

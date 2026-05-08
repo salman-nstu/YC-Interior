@@ -1,0 +1,10 @@
+{
+  "buildCommand": "npx ng build --configuration production",
+  "outputDirectory": "dist/yc-interior/browser",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
