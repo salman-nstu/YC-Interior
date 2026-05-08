@@ -1,0 +1,25 @@
+# PRODUCTION: Render deployment configuration
+services:
+  - type: web
+    name: yc-interior-backend
+    env: java
+    plan: free
+    buildCommand: ./mvnw clean package -DskipTests
+    startCommand: java -jar target/interior-1.0.0.jar
+    envVars:
+      - key: RAILWAY_MYSQL_HOST
+        sync: false
+      - key: RAILWAY_MYSQL_PORT
+        value: "3306"
+      - key: RAILWAY_MYSQL_DATABASE
+        sync: false
+      - key: RAILWAY_MYSQL_USER
+        sync: false
+      - key: RAILWAY_MYSQL_PASSWORD
+        sync: false
+      - key: JAVA_OPTS
+        value: "-Xmx512m"
+      - key: UPLOAD_DIR
+        value: "/tmp/uploads"
+      - key: FILE_BASE_URL
+        sync: false
