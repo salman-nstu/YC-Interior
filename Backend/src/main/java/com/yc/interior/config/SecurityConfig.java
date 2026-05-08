@@ -85,12 +85,8 @@ public class SecurityConfig {
             "https://admin.yc-interior.com"                 // PRODUCTION: Admin domain
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-        config.setAllowedHeaders(List.of(
-            "Authorization", 
-            "Content-Type", 
-            "X-Requested-With",
-            "X-CSRF-TOKEN"
-        ));
+        // LOCAL & PRODUCTION: Allow all headers including cache-control
+        config.setAllowedHeaders(List.of("*"));  // Allow all headers
         config.setAllowCredentials(true);
         config.setMaxAge(3600L);
         config.setExposedHeaders(List.of("X-CSRF-TOKEN"));
